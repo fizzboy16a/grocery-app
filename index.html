@@ -9,67 +9,103 @@
 <body class="bg-slate-100 font-sans min-h-screen pb-12">
     <div class="w-full max-w-2xl mx-auto p-4 md:p-8 space-y-6">
         
-        <!-- App Header Bar -->
-        <div class="w-full flex items-center justify-between py-2">
+        <!-- App Header Bar with View Switcher -->
+        <div class="w-full flex items-center justify-between py-2 flex-wrap gap-3">
             <div class="flex items-center gap-3">
                 <span class="text-3xl">🛒</span>
                 <h1 class="text-2xl font-bold tracking-tight text-slate-800">Family Grocery</h1>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+                <!-- View Tabs -->
+                <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 text-xs font-semibold">
+                    <button id="tab-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all">List</button>
+                    <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI Logs</button>
+                </div>
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
                     🔄 <span id="status-text">Sync</span>
                 </button>
                 <button id="reset-btn" onclick="openResetModal()" class="hidden bg-red-50 text-red-600 font-medium text-sm rounded-xl px-4 py-2 hover:bg-red-100 transition-all border border-red-200">
-                    Reset List
+                    Reset
                 </button>
             </div>
         </div>
 
-        <!-- Section 1: Quick Staples Grid Card with Active Search Bar -->
-        <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
-            <div class="w-full flex items-center justify-between">
-                <h2 class="text-lg font-bold text-slate-800 tracking-tight">Quick Add Staples</h2>
+        <!-- ==================== VIEW 1: SHOPPING LIST ==================== -->
+        <div id="view-list" class="space-y-6">
+            <!-- Section 1: Quick Staples Grid Card with Active Search Bar -->
+            <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <div class="w-full flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Quick Add Staples</h2>
+                </div>
+                <input type="text" id="search-input" placeholder="Search staples (e.g., milk, chicken)..." 
+                    class="w-full bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                    oninput="handleSearch(this.value)">
+                
+                <div id="staples-container" class="grid grid-cols-3 gap-3">
+                    <!-- Rendered via JS -->
+                </div>
             </div>
-            <input type="text" id="search-input" placeholder="Search staples (e.g., milk, chicken)..." 
-                class="w-full bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
-                oninput="handleSearch(this.value)">
-            
-            <div id="staples-container" class="grid grid-cols-3 gap-3">
-                <!-- Rendered via JS -->
-            </div>
-        </div>
 
-        <!-- Section 2: Custom Item Card (Responsive stack fix) -->
-        <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
-            <h2 class="text-lg font-bold text-slate-800 tracking-tight">Add Custom Item</h2>
-            <div class="w-full flex flex-col sm:flex-row gap-2">
-                <input type="text" id="custom-name-input" placeholder="e.g., Avocados" 
-                    class="w-full sm:flex-grow bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500">
-                <div class="flex gap-2">
-                    <select id="custom-cat-input" class="flex-1 sm:w-auto bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none">
-                        <option value="Pantry">13. Pantry</option>
-                        <option value="Dairy">15. Dairy</option>
-                        <option value="Salad & Vegetables">1. Salad & Veg</option>
-                        <option value="Meat">12. Meat</option>
-                        <option value="Frozen">19. Frozen</option>
-                    </select>
-                    <button onclick="addCustomItem()" class="h-10 px-5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 shadow-sm transition-all text-sm shrink-0">
-                        Add
-                    </button>
+            <!-- Section 2: Custom Item Card -->
+            <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <h2 class="text-lg font-bold text-slate-800 tracking-tight">Add Custom Item</h2>
+                <div class="w-full flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="custom-name-input" placeholder="e.g., Avocados" 
+                        class="w-full sm:flex-grow bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500">
+                    <div class="flex gap-2">
+                        <select id="custom-cat-input" class="flex-1 sm:w-auto bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none">
+                            <option value="Pantry">13. Pantry</option>
+                            <option value="Dairy">15. Dairy</option>
+                            <option value="Salad & Vegetables">1. Salad & Veg</option>
+                            <option value="Meat">12. Meat</option>
+                            <option value="Frozen">19. Frozen</option>
+                        </select>
+                        <button onclick="addCustomItem()" class="h-10 px-5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 shadow-sm transition-all text-sm shrink-0">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Live Route-Sorted List Card -->
+            <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-2">
+                <div class="w-full flex items-center justify-between mb-2">
+                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Route Order)</h2>
+                    <span id="timestamp-label" class="text-xs font-medium text-slate-400">Last updated: Never</span>
+                </div>
+                <div id="list-container" class="space-y-1">
+                    <!-- Rendered via JS -->
                 </div>
             </div>
         </div>
 
-        <!-- Section 3: Live Route-Sorted List Card -->
-        <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-2">
-            <div class="w-full flex items-center justify-between mb-2">
-                <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Route Order)</h2>
-                <span id="timestamp-label" class="text-xs font-medium text-slate-400">Last updated: Never</span>
-            </div>
-            <div id="list-container" class="space-y-1">
-                <!-- Rendered via JS -->
+        <!-- ==================== VIEW 2: AI ROUTE DATA OUTPUT ==================== -->
+        <div id="view-logs" class="hidden space-y-6">
+            <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs</h2>
+                        <p class="text-xs text-slate-500">Offline-captured timestamped sequence gaps for route training.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="copyLogsToClipboard()" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">📋 Copy JSON</button>
+                        <button onclick="clearTripLogs()" class="bg-red-50 text-red-600 text-xs font-medium px-3 py-2 rounded-xl hover:bg-red-100 transition-all border border-red-200">Clear Logs</button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-2xl overflow-x-auto max-h-96 leading-relaxed" id="logs-json-output">
+                    Loading logs...
+                </div>
+
+                <div class="space-y-2">
+                    <h3 class="text-sm font-semibold text-slate-700">Recent Transitions Breakdown</h3>
+                    <div id="logs-list-container" class="space-y-2 text-xs text-slate-600">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 
     <!-- Reset Modal -->
@@ -140,11 +176,33 @@
 
         const staples = [...raw_staples].sort((a, b) => a.name.localeCompare(b.name));
         let shoppingList = JSON.parse(localStorage.getItem('grocery_list') || '[]');
+        let tripLogs = JSON.parse(localStorage.getItem('grocery_trip_logs') || '[]');
+        let lastCheckTimestamp = parseInt(localStorage.getItem('grocery_last_check_ts') || '0', 10);
         let lastUpdatedTime = "Never";
         let searchQuery = "";
 
         const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
         const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
+
+        function switchView(viewName) {
+            const listBtn = document.getElementById('tab-list');
+            const logsBtn = document.getElementById('tab-logs');
+            const listView = document.getElementById('view-list');
+            const logsView = document.getElementById('view-logs');
+
+            if (viewName === 'list') {
+                listView.classList.remove('hidden');
+                logsView.classList.add('hidden');
+                listBtn.className = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
+                logsBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+            } else {
+                listView.classList.add('hidden');
+                logsView.classList.remove('hidden');
+                logsBtn.className = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
+                listBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+                renderLogsView();
+            }
+        }
 
         function updateTimestamp() {
             const now = new Date();
@@ -153,6 +211,8 @@
 
         function saveState() {
             localStorage.setItem('grocery_list', JSON.stringify(shoppingList));
+            localStorage.setItem('grocery_trip_logs', JSON.stringify(tripLogs));
+            localStorage.setItem('grocery_last_check_ts', lastCheckTimestamp.toString());
             updateTimestamp();
             renderAll();
             autoPushCloud();
@@ -191,6 +251,23 @@
             const item = shoppingList[idx];
             if (!item) return;
             item.checked = !item.checked;
+
+            const now = Date.now();
+            if (item.checked) {
+                const deltaSeconds = lastCheckTimestamp > 0 ? Math.round((now - lastCheckTimestamp) / 1000) : 0;
+                tripLogs.push({
+                    item: item.name,
+                    category: item.category,
+                    routeNum: STORE_LAYOUT[item.category] || null,
+                    checkedAtISO: new Date(now).toISOString(),
+                    secSincePrevCheck: deltaSeconds
+                });
+                lastCheckTimestamp = now;
+            } else {
+                // Remove last matching entry for this item if unchecking
+                const revIdx = tripLogs.map(l => l.item).lastIndexOf(item.name);
+                if (revIdx > -1) tripLogs.splice(revIdx, 1);
+            }
             saveState();
         }
 
@@ -206,6 +283,19 @@
             lastUpdatedTime = "Never";
             closeResetModal();
             saveState();
+        }
+
+        function clearTripLogs() {
+            tripLogs = [];
+            lastCheckTimestamp = 0;
+            saveState();
+            renderLogsView();
+        }
+
+        function copyLogsToClipboard() {
+            navigator.clipboard.writeText(JSON.stringify(tripLogs, null, 2)).then(() => {
+                alert('Copied AI route transition logs to clipboard!');
+            });
         }
 
         function handleSearch(val) {
@@ -295,6 +385,27 @@
             }).join('');
         }
 
+        function renderLogsView() {
+            const jsonOutput = document.getElementById('logs-json-output');
+            const listContainer = document.getElementById('logs-list-container');
+            jsonOutput.innerText = JSON.stringify(tripLogs, null, 2);
+
+            if (!tripLogs.length) {
+                listContainer.innerHTML = '<div class="text-slate-400 italic">No transition logs recorded yet. Check off items while shopping!</div>';
+                return;
+            }
+
+            listContainer.innerHTML = [...tripLogs].reverse().map(l => `
+                <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl">
+                    <div>
+                        <span class="font-semibold text-slate-800">${l.item}</span> 
+                        <span class="text-slate-400">(${l.category}, Route #${l.routeNum || '?'})</span>
+                    </div>
+                    <div class="font-mono text-slate-500">+${l.secSincePrevCheck}s gap</div>
+                </div>
+            `).join('');
+        }
+
         function renderAll() {
             renderStaplesGrid();
             renderListDisplay();
@@ -309,7 +420,9 @@
                 const data = await res.json();
                 if (data.record) {
                     shoppingList = Array.isArray(data.record) ? data.record : (data.record.items || []);
+                    if (data.record.tripLogs) tripLogs = data.record.tripLogs;
                     localStorage.setItem('grocery_list', JSON.stringify(shoppingList));
+                    localStorage.setItem('grocery_trip_logs', JSON.stringify(tripLogs));
                     updateTimestamp();
                     renderAll();
                     document.getElementById('status-text').innerText = 'Sync';
@@ -324,7 +437,7 @@
                 await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-                    body: JSON.stringify({ items: shoppingList })
+                    body: JSON.stringify({ items: shoppingList, tripLogs: tripLogs })
                 });
             } catch(e) {}
         }
