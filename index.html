@@ -47,10 +47,9 @@
             "Juice": 17, "Cheese & Bacon": 18, "Frozen": 19
         };
 
-        // Free JSONbin config (replaceable with your own free bin ID)
-        // Leave empty or setup jsonbin.io free tier ID if multi-phone live sync needed
-        const JSONBIN_BIN_ID = ""; // e.g. "65abc..."
-        const JSONBIN_API_KEY = ""; // optional public read/write key
+        // Configured Credentials
+        const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
+        const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
 
         let items = JSON.parse(localStorage.getItem('grocery_list') || '[]');
 
@@ -95,8 +94,7 @@
             const sorted = getSortedItems();
             container.innerHTML = sorted.length === 0 
                 ? '<div class="text-center text-slate-400 py-8 text-sm">List is empty</div>' 
-                : sorted.map((item, idx) => {
-                    // find real index in items array
+                : sorted.map((item) => {
                     const realIdx = items.indexOf(item);
                     const routeNum = STORE_LAYOUT[item.category] || '??';
                     return `
@@ -119,17 +117,14 @@
         }
 
         async function syncWithCloud() {
-            if (!JSONBIN_BIN_ID) {
-                alert('Local-only mode active. Add a JSONbin ID to enable cloud multi-phone sync.');
-                return;
-            }
             document.getElementById('status-text').innerText = 'Syncing...';
             try {
-                // Fetch latest from cloud
-                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`);
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                });
                 const data = await res.json();
                 if (data.record) {
-                    items = data.record;
+                    items = Array.isArray(data.record) ? data.record : (data.record.items || []);
                     saveLocal();
                     document.getElementById('status-text').innerText = 'Synced just now';
                 }
@@ -139,17 +134,17 @@
         }
 
         async function autoPushCloud() {
-            if (!JSONBIN_BIN_ID || !JSONBIN_API_KEY) return;
             try {
                 await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-                    body: JSON.stringify(items)
+                    body: JSON.stringify({ items: items })
                 });
             } catch(e) {}
         }
 
-        renderList();
+        // Initial fetch from cloud on load
+        syncWithCloud();
     </script>
 </body>
 </html>
