@@ -13,7 +13,7 @@
         <div class="w-full flex items-center justify-between py-2">
             <div class="flex items-center gap-3">
                 <span class="text-3xl">🛒</span>
-                <h1 class="text-2xl font-bold tracking-tight text-slate-800">Family Grocery-test1</h1>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-800">Family Grocery</h1>
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
@@ -91,50 +91,50 @@
         };
 
         const raw_staples = [
-            { name: "Spinach", category: "Salad & Vegetables", emoji: "🥬" },
-            { name: "Lettuce", category: "Salad & Vegetables", emoji: "🥗" },
-            { name: "Tomatoes", category: "Salad & Vegetables", emoji: "🍅" },
-            { name: "Bananas", category: "Bananas", emoji: "🍌" },
-            { name: "Pumpkin Seeds", category: "Health Foods", emoji: "🌱" },
-            { name: "Blueberries", category: "Berries", emoji: "🫐" },
-            { name: "Raspberries", category: "Berries", emoji: "🍇" },
-            { name: "Mushrooms", category: "Fresh Produce", emoji: "🍄" },
-            { name: "Cucumber", category: "Fresh Produce", emoji: "🥒" },
-            { name: "Spring Onion", category: "Fresh Produce", emoji: "🧅" },
-            { name: "Garlic", category: "Fresh Produce", emoji: "🧄" },
-            { name: "Peppers", category: "Fresh Produce", emoji: "🫑" },
-            { name: "Tendersteam Broccoli", category: "Fresh Produce", emoji: "🥦" },
-            { name: "Cod", category: "Fish & Seafood", emoji: "🐟" },
-            { name: "Salmon", category: "Fish & Seafood", emoji: "🍣" },
-            { name: "Tuna", category: "Fish & Seafood", emoji: "🐟" },
-            { name: "Comfort Pure", category: "Household", emoji: "🧴" },
-            { name: "Bleach", category: "Household", emoji: "🧪" },
-            { name: "Bin Liners", category: "Household", emoji: "🗑️" },
-            { name: "Squash", category: "Drinks", emoji: "🧃" },
-            { name: "Bread", category: "Bakery", emoji: "🍞" },
-            { name: "Burger Buns", category: "Bakery", emoji: "🍔" },
-            { name: "Soreen", category: "Bakery", emoji: "🍞" },
-            { name: "KitKats", category: "Snacks", emoji: "🍫" },
-            { name: "Coffee", category: "Coffee & Sugar", emoji: "☕" },
-            { name: "Sugar", category: "Coffee & Sugar", emoji: "🧊" },
-            { name: "Sweeteners", category: "Coffee & Sugar", emoji: "✨" },
-            { name: "Chicken Breast", category: "Meat", emoji: "🍗" },
-            { name: "Mince Meat", category: "Meat", emoji: "🥩" },
-            { name: "Beef", category: "Meat", emoji: "🥩" },
-            { name: "Dolmio Sauce", category: "Pantry", emoji: "🥫" },
-            { name: "Pasta", category: "Pantry", emoji: "🍝" },
-            { name: "Spanish Grains", category: "Grains", emoji: "🌾" },
-            { name: "Milk", category: "Dairy", emoji: "🥛" },
-            { name: "Protein Yogurt", category: "Dairy", emoji: " yogurt" },
-            { name: "Kefir", category: "Dairy", emoji: "🥛" },
-            { name: "Olive Oil", category: "Condiments", emoji: "🫒" },
-            { name: "Ketchup", category: "Condiments", emoji: "🍅" },
-            { name: "BBQ Sauce", category: "Condiments", emoji: "🍖" },
-            { name: "Orange Juice", category: "Juice", emoji: "🍊" },
-            { name: "Cheese", category: "Cheese & Bacon", emoji: "🧀" },
-            { name: "Bacon", category: "Cheese & Bacon", emoji: "🥓" },
-            { name: "Mini Magnums", category: "Frozen", emoji: "🍦" }
-        ];
+            { name: "Spinach", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
+            { name: "Lettuce", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
+            { name: "Tomatoes", category: "Salad & Vegetables", img: "icons8-tomatoes-48.png" },
+            { name: "Bananas", category: "Bananas", img: "icons8-banana-100.png" },
+            { name: "Pumpkin Seeds", category: "Health Foods", img: "icons8-pumkin-64.png" },
+            { name: "Blueberries", category: "Berries", img: "icons8-blueberries-48.png" },
+            { name: "Raspberries", category: "Berries", img: "icons8-raspberry-48.png" },
+            { name: "Mushrooms", category: "Fresh Produce", img: "icons8-mushroom-48.png" },
+            { name: "Cucumber", category: "Fresh Produce", img: "icons8-cucumber-64.png" },
+            { name: "Spring Onion", category: "Fresh Produce", img: "icons8-onion-48 (1).png" },
+            { name: "Garlic", category: "Fresh Produce", img: "icons8-garlic-48.png" },
+            { name: "Peppers", category: "Fresh Produce", img: "icons8-tomatoes-48.png" },
+            { name: "Tendersteam Broccoli", category: "Fresh Produce", img: "icons8-broccoli-100.png" },
+            { name: "Cod", category: "Fish & Seafood", img: "icons8-cod-48.png" },
+            { name: "Salmon", category: "Fish & Seafood", img: "icons8-tuna-67.png" },
+            { name: "Tuna", category: "Fish & Seafood", img: "icons8-tuna-67.png" },
+            { name: "Comfort Pure", category: "Household", img: "icons8-bleach-24.png" },
+            { name: "Bleach", category: "Household", img: "icons8-bleach-24.png" },
+            { name: "Bin Liners", category: "Household", img: "icons8-recycle-bin-80.png" },
+            { name: "Squash", category: "Drinks", img: "icons8-juice-64.png" },
+            { name: "Bread", category: "Bakery", img: "icons8-bread-64.png" },
+            { name: "Burger Buns", category: "Bakery", img: "icons8-hamburger-24.png" },
+            { name: "Soreen", category: "Bakery", img: "icons8-barley-100.png" },
+            { name: "KitKats", category: "Snacks", img: "icons8-chocolate-100.png" },
+            { name: "Coffee", category: "Coffee & Sugar", img: "icons8-coffee-48.png" },
+            { name: "Sugar", category: "Coffee & Sugar", img: "icons8-sugar-cube-80.png" },
+            { name: "Sweeteners", category: "Coffee & Sugar", img: "icons8-sweetener-50.png" },
+            { name: "Chicken Breast", category: "Meat", img: "icons8-chicken-breast-64.png" },
+            { name: "Mince Meat", category: "Meat", img: "icons8-ground-beef-100.png" },
+            { name: "Beef", category: "Meat", img: "icons8-beef-48.png" },
+            { name: "Dolmio Sauce", category: "Pantry", img: "icons8-ketchup-100.png" },
+            { name: "Pasta", category: "Pantry", img: "icons8-spaghetti-48.png" },
+            { name: "Spanish Grains", category: "Grains", img: "icons8-spain-48.png" },
+            { name: "Milk", category: "Dairy", img: "icons8-milk-48.png" },
+            { name: "Protein Yogurt", category: "Dairy", img: "icons8-milk-48 (1).png" },
+            { name: "Kefir", category: "Dairy", img: "icons8-milk-48.png" },
+            { name: "Olive Oil", category: "Condiments", img: "icons8-olive-oil-24.png" },
+            { name: "Ketchup", category: "Condiments", img: "icons8-ketchup-100.png" },
+            { name: "BBQ Sauce", category: "Condiments", img: "icons8-bbq-sauce-24.png" },
+            { name: "Orange Juice", category: "Juice", img: "icons8-orange-juice-100.png" },
+            { name: "Cheese", category: "Cheese & Bacon", img: "icons8-cheese-94.png" },
+            { name: "Bacon", category: "Cheese & Bacon", img: "icons8-bacon-100.png" },
+            { name: "Mini Magnums", category: "Frozen", img: "icons8-melting-ice-cream-48.png" }
+        ]; [cite: 1]
 
         const staples = [...raw_staples].sort((a, b) => a.name.localeCompare(b.name));
         let shoppingList = JSON.parse(localStorage.getItem('grocery_list') || '[]');
@@ -169,7 +169,7 @@
                 shoppingList.push({
                     name: stapleData.name,
                     category: stapleData.category,
-                    emoji: stapleData.emoji || "🛒",
+                    img: stapleData.img || "",
                     quantity: delta,
                     checked: false
                 });
@@ -220,7 +220,7 @@
             if (existing) {
                 existing.quantity += 1;
             } else {
-                shoppingList.push({ name: customName, category: cat, emoji: "📦", quantity: 1, checked: false });
+                shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false });
             }
             input.value = '';
             saveState();
@@ -238,10 +238,11 @@
                 const existing = shoppingList.find(i => i.name.toLowerCase() === staple.name.toLowerCase());
                 const qty = existing ? existing.quantity : 0;
                 const escaped = safeName(staple.name);
+                const imgTag = staple.img ? `<img src="images/${staple.img}" class="w-9 h-9 object-contain">` : `<span class="text-2xl">📦</span>`;
                 return `
                     <div class="p-3 flex flex-col items-center justify-between rounded-2xl transition-all border select-none text-center h-36 bg-white border-slate-200 shadow-sm hover:border-emerald-500">
                         <div class="items-center justify-center gap-1 cursor-pointer w-full flex-grow flex flex-col" onclick="adjustStapleQtyByName('${escaped}', 1)">
-                            <span class="text-2xl">${staple.emoji}</span>
+                            ${imgTag}
                             <span class="text-xs font-medium text-slate-700 leading-tight">${staple.name}</span>
                         </div>
                         <div class="w-full flex items-center justify-center gap-1 bg-slate-50 rounded-xl py-1 border border-slate-100">
@@ -271,10 +272,11 @@
                 const routeNum = STORE_LAYOUT[item.category] || '??';
                 const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-50' : 'bg-slate-50 border-slate-100';
                 const labelClasses = item.checked ? 'text-slate-400 line-through' : 'text-slate-700';
+                const imgTag = item.img ? `<img src="images/${item.img}" class="w-6 h-6 object-contain">` : `<span class="text-lg">🛒</span>`;
                 return `
                     <div class="w-full items-center justify-between border px-4 py-3 rounded-xl shadow-sm mb-2 transition-all flex ${rowClasses}">
                         <div class="items-center gap-3 flex-grow cursor-pointer select-none flex" onclick="toggleCheckByIndex(${realIdx})">
-                            <span class="text-lg">${item.emoji || '🛒'}</span>
+                            ${imgTag}
                             <div>
                                 <div class="text-base font-medium ${labelClasses}">${item.name}</div>
                                 <div class="text-[11px] text-slate-400">Route #${routeNum} • ${item.category}</div>
