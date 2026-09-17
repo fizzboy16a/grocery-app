@@ -39,22 +39,24 @@
             </div>
         </div>
 
-        <!-- Section 2: Custom Item Card -->
+        <!-- Section 2: Custom Item Card (Responsive stack fix) -->
         <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
             <h2 class="text-lg font-bold text-slate-800 tracking-tight">Add Custom Item</h2>
-            <div class="w-full flex gap-3 items-center">
+            <div class="w-full flex flex-col sm:flex-row gap-2">
                 <input type="text" id="custom-name-input" placeholder="e.g., Avocados" 
-                    class="flex-grow bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500">
-                <select id="custom-cat-input" class="bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none">
-                    <option value="Pantry">13. Pantry</option>
-                    <option value="Dairy">15. Dairy</option>
-                    <option value="Salad & Vegetables">1. Salad & Veg</option>
-                    <option value="Meat">12. Meat</option>
-                    <option value="Frozen">19. Frozen</option>
-                </select>
-                <button onclick="addCustomItem()" class="h-10 px-6 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 shadow-sm transition-all text-sm">
-                    Add
-                </button>
+                    class="w-full sm:flex-grow bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500">
+                <div class="flex gap-2">
+                    <select id="custom-cat-input" class="flex-1 sm:w-auto bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none">
+                        <option value="Pantry">13. Pantry</option>
+                        <option value="Dairy">15. Dairy</option>
+                        <option value="Salad & Vegetables">1. Salad & Veg</option>
+                        <option value="Meat">12. Meat</option>
+                        <option value="Frozen">19. Frozen</option>
+                    </select>
+                    <button onclick="addCustomItem()" class="h-10 px-5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 shadow-sm transition-all text-sm shrink-0">
+                        Add
+                    </button>
+                </div>
             </div>
         </div>
 
