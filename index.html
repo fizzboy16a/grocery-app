@@ -121,22 +121,37 @@
             </div>
         </div>
 
-        <!-- ==================== VIEW 3: BIRD'S-EYE STORE MAP ==================== -->
+        <!-- ==================== VIEW 3: BIRD'S-EYE STORE MAP & CALIBRATOR ==================== -->
         <div id="view-map" class="hidden space-y-6">
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Bird's-Eye Store Floor Plan</h2>
-                        <p class="text-xs text-slate-500">Aerial layout showing sequence polyline path and visit step pins across Routes 1–19.</p>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Offline Store Floor Plan Map</h2>
+                        <p class="text-xs text-slate-500">Zero hardcoded coordinates. Calibrate positions offline or view trip path.</p>
                     </div>
-                    <div class="flex items-center gap-2 text-[10px] font-semibold">
-                        <span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg border border-emerald-100">Green = Visited Route</span>
-                        <span class="bg-slate-900 text-white px-2 py-1 rounded-lg">Step Pin (#1, #2)</span>
+                    <div class="flex items-center gap-2">
+                        <button id="map-mode-toggle" onclick="toggleCalibrationMode()" class="bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-800 transition-all">
+                            🛠️ Calibrate Layout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calibration Controls (Hidden by default) -->
+                <div id="calibration-bar" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2 text-xs">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <span class="font-bold text-amber-900">Calibration Mode Active: Tap map to place selected zone</span>
+                        <button onclick="clearCalibrationCoords()" class="text-red-600 font-medium underline">Reset Layout</button>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-slate-600 font-medium">Select Route to Drop:</span>
+                        <select id="calibrate-route-select" class="bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800">
+                            <!-- Populated via JS -->
+                        </select>
                     </div>
                 </div>
 
                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 overflow-x-auto flex justify-center">
-                    <svg id="bird-map-svg" viewBox="0 0 740 460" class="w-full max-w-[700px] h-auto select-none">
+                    <svg id="bird-map-svg" viewBox="0 0 740 460" class="w-full max-w-[700px] h-auto select-none cursor-crosshair">
                         <!-- Rendered via renderMapView() -->
                     </svg>
                 </div>
@@ -165,28 +180,11 @@
             "Juice": 17, "Cheese & Bacon": 18, "Frozen": 19
         };
 
-        // Architectural coordinates (x, y) for bird's-eye store floor plan (740x460 canvas)
-        const STORE_ZONE_COORDS = {
-            1:  { x: 75,  y: 350, label: "1. Salad/Veg", w: 75, h: 45 },
-            2:  { x: 75,  y: 280, label: "2. Bananas", w: 75, h: 45 },
-            3:  { x: 75,  y: 210, label: "3. Health", w: 75, h: 45 },
-            4:  { x: 75,  y: 140, label: "4. Berries", w: 75, h: 45 },
-            5:  { x: 175, y: 140, label: "5. Produce", w: 75, h: 45 },
-            6:  { x: 275, y: 140, label: "6. Seafood", w: 75, h: 45 },
-            7:  { x: 375, y: 140, label: "7. Household", w: 75, h: 45 },
-            8:  { x: 475, y: 140, label: "8. Drinks", w: 75, h: 45 },
-            9:  { x: 575, y: 140, label: "9. Bakery", w: 75, h: 45 },
-            10: { x: 575, y: 210, label: "10. Snacks", w: 75, h: 45 },
-            11: { x: 575, y: 280, label: "11. Coffee", w: 75, h: 45 },
-            12: { x: 575, y: 350, label: "12. Meat", w: 75, h: 45 },
-            13: { x: 475, y: 350, label: "13. Pantry", w: 75, h: 45 },
-            14: { x: 375, y: 350, label: "14. Grains", w: 75, h: 45 },
-            15: { x: 275, y: 350, label: "15. Dairy", w: 75, h: 45 },
-            16: { x: 175, y: 350, label: "16. Condiments", w: 75, h: 45 },
-            17: { x: 175, y: 280, label: "17. Juice", w: 75, h: 45 },
-            18: { x: 275, y: 280, label: "18. Cheese/Bacon", w: 75, h: 45 },
-            19: { x: 375, y: 280, label: "19. Frozen", w: 75, h: 45 }
-        };
+        const REVERSE_STORE_LAYOUT = Object.entries(STORE_LAYOUT).reduce((acc, [cat, num]) => { acc[num] = cat; return acc; }, {});
+
+        // Zero hardcoded spatial coordinates: loaded offline from localStorage or empty object
+        let storeZoneCoords = JSON.parse(localStorage.getItem('grocery_store_coords') || '{}');
+        let isCalibrating = false;
 
         const raw_staples = [
             { name: "Spinach", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
@@ -259,6 +257,56 @@
 
         const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
         const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
+
+        // Setup SVG click listener for calibrating coordinates offline
+        document.getElementById('bird-map-svg').addEventListener('click', (e) => {
+            if (!isCalibrating) return;
+            const routeSelect = document.getElementById('calibrate-route-select');
+            const targetRoute = parseInt(routeSelect.value, 10);
+            if (!targetRoute) return;
+
+            const svg = document.getElementById('bird-map-svg');
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            const ctm = svg.getScreenCTM().inverse();
+            const svgPoint = pt.matrixTransform(ctm);
+
+            storeZoneCoords[targetRoute] = {
+                x: Math.round(svgPoint.x - 37.5),
+                y: Math.round(svgPoint.y - 22.5)
+            };
+            localStorage.setItem('grocery_store_coords', JSON.stringify(storeZoneCoords));
+            renderMapView();
+        });
+
+        function populateCalibrateDropdown() {
+            const sel = document.getElementById('calibrate-route-select');
+            sel.innerHTML = Array.from({length: 19}, (_, i) => i + 1).map(num => {
+                const placed = storeZoneCoords[num] ? '✓ ' : '';
+                return `<option value="${num}">${placed}Route #${num} (${(REVERSE_STORE_LAYOUT[num] || '').split('&')[0]})</option>`;
+            }).join('');
+        }
+
+        function toggleCalibrationMode() {
+            isCalibrating = !isCalibrating;
+            const bar = document.getElementById('calibration-bar');
+            const btn = document.getElementById('map-mode-toggle');
+            bar.classList.toggle('hidden', !isCalibrating);
+            btn.innerText = isCalibrating ? '✅ Done Calibrating' : '🛠️ Calibrate Layout';
+            btn.className = isCalibrating 
+                ? 'bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-emerald-700 transition-all'
+                : 'bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-800 transition-all';
+            if (isCalibrating) populateCalibrateDropdown();
+            renderMapView();
+        }
+
+        function clearCalibrationCoords() {
+            storeZoneCoords = {};
+            localStorage.removeItem('grocery_store_coords');
+            populateCalibrateDropdown();
+            renderMapView();
+        }
 
         function switchView(viewName) {
             const listBtn = document.getElementById('tab-list');
@@ -527,8 +575,9 @@
         function renderMapView() {
             const svg = document.getElementById('bird-map-svg');
             const clusteredLogs = computeDynamicClusters(tripLogs, 90);
+            const w = 75;
+            const h = 45;
             
-            // Build sequence step order map per route number
             const visitOrderMap = {};
             const orderedVisitedCoords = [];
             
@@ -537,14 +586,13 @@
                     if (!visitOrderMap[l.routeNum]) {
                         visitOrderMap[l.routeNum] = idx + 1;
                     }
-                    const c = STORE_ZONE_COORDS[l.routeNum];
+                    const c = storeZoneCoords[l.routeNum];
                     if (c && !orderedVisitedCoords.some(pt => pt.num === l.routeNum)) {
-                        orderedVisitedCoords.push({ num: l.routeNum, x: c.x + c.w/2, y: c.y + c.h/2, step: idx + 1 });
+                        orderedVisitedCoords.push({ num: l.routeNum, x: c.x + w/2, y: c.y + h/2, step: idx + 1 });
                     }
                 }
             });
 
-            // Draw architectural store walls & entrance
             let svgContent = `
                 <!-- Outer Store Perimeter Wall -->
                 <rect x="40" y="80" width="630" height="340" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="4"></rect>
@@ -554,30 +602,41 @@
                 <text x="370" y="429" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle">CHECKOUTS / ENTRANCE ⬇</text>
             `;
 
-            // Draw polyline connecting visited points in chronological step order
+            // Draw polyline connecting visited & calibrated coordinates
             if (orderedVisitedCoords.length > 1) {
                 const pointsStr = orderedVisitedCoords.map(p => `${p.x},${p.y}`).join(' ');
                 svgContent += `<polyline points="${pointsStr}" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="6,4" opacity="0.8"></polyline>`;
             }
 
-            // Draw all 19 store aisle/department blocks
-            Object.entries(STORE_ZONE_COORDS).forEach(([routeNumStr, zone]) => {
-                const rNum = parseInt(routeNumStr, 10);
-                const stepNum = visitOrderMap[rNum];
-                const isVisited = stepNum !== undefined;
-                
-                const fillCol = isVisited ? '#d1fae5' : '#f8fafc';
-                const strokeCol = isVisited ? '#059669' : '#cbd5e1';
-                const textCol = isVisited ? '#065f46' : '#64748b';
-
+            // Render all calibrated zones or uncalibrated placeholder guidance
+            const placedKeys = Object.keys(storeZoneCoords);
+            if (!placedKeys.length && !isCalibrating) {
                 svgContent += `
-                    <g transform="translate(${zone.x}, ${zone.y})">
-                        <rect width="${zone.w}" height="${zone.h}" rx="8" fill="${fillCol}" stroke="${strokeCol}" stroke-width="${isVisited ? '2.5' : '1.5'}"></rect>
-                        <text x="${zone.w/2}" y="${zone.h/2 - 4}" font-size="9" font-weight="bold" fill="${textCol}" text-anchor="middle">${zone.label.split('.')[0]}</text>
-                        <text x="${zone.w/2}" y="${zone.h/2 + 9}" font-size="8" fill="${textCol}" text-anchor="middle" opacity="0.85">${zone.label.split('. ') || ''}</text>
+                    <g transform="translate(355, 230)">
+                        <rect x="-170" y="-22" width="340" height="44" rx="10" fill="#ffffff" stroke="#e2e8f0"></rect>
+                        <text x="0" y="4" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">No calibrated zones yet — tap "Calibrate Layout" above!</text>
                     </g>
                 `;
-            });
+            } else {
+                Object.entries(storeZoneCoords).forEach(([rNumStr, coords]) => {
+                    const rNum = parseInt(rNumStr, 10);
+                    const stepNum = visitOrderMap[rNum];
+                    const isVisited = stepNum !== undefined;
+                    const catName = REVERSE_STORE_LAYOUT[rNum] || `Zone ${rNum}`;
+
+                    const fillCol = isVisited ? '#d1fae5' : '#f8fafc';
+                    const strokeCol = isVisited ? '#059669' : '#cbd5e1';
+                    const textCol = isVisited ? '#065f46' : '#64748b';
+
+                    svgContent += `
+                        <g transform="translate(${coords.x}, ${coords.y})">
+                            <rect width="${w}" height="${h}" rx="8" fill="${fillCol}" stroke="${strokeCol}" stroke-width="${isVisited ? '2.5' : '1.5'}"></rect>
+                            <text x="${w/2}" y="${h/2 - 4}" font-size="9" font-weight="bold" fill="${textCol}" text-anchor="middle">R#${rNum}</text>
+                            <text x="${w/2}" y="${h/2 + 9}" font-size="8" fill="${textCol}" text-anchor="middle" opacity="0.85">${catName.split('&')[0]}</text>
+                        </g>
+                    `;
+                });
+            }
 
             // Draw chronological Step Badges (#1, #2, etc.) on top of visited aisle centroids
             orderedVisitedCoords.forEach((pt) => {
@@ -588,15 +647,6 @@
                     </g>
                 `;
             });
-
-            if (!clusteredLogs.length) {
-                svgContent += `
-                    <g transform="translate(355, 230)">
-                        <rect x="-140" y="-22" width="280" height="44" rx="10" fill="#ffffff" stroke="#e2e8f0"></rect>
-                        <text x="0" y="4" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">No trip data yet — check off items on List tab!</text>
-                    </g>
-                `;
-            }
 
             svg.innerHTML = svgContent;
         }
@@ -622,6 +672,10 @@
                 if (data.record) {
                     shoppingList = Array.isArray(data.record) ? data.record : (data.record.items || []);
                     if (data.record.tripLogs) tripLogs = data.record.tripLogs;
+                    if (data.record.storeCoords) {
+                        storeZoneCoords = data.record.storeCoords;
+                        localStorage.setItem('grocery_store_coords', JSON.stringify(storeZoneCoords));
+                    }
                     localStorage.setItem('grocery_list', JSON.stringify(shoppingList));
                     localStorage.setItem('grocery_trip_logs', JSON.stringify(tripLogs));
                     updateTimestamp();
@@ -640,7 +694,7 @@
                 await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-                    body: JSON.stringify({ items: shoppingList, tripLogs: tripLogs })
+                    body: JSON.stringify({ items: shoppingList, tripLogs: tripLogs, storeCoords: storeZoneCoords })
                 });
             } catch(e) {}
         }
