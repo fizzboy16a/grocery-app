@@ -16,11 +16,10 @@
                 <h1 class="text-2xl font-bold tracking-tight text-slate-800">Family Grocery</h1>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-                <!-- View Tabs -->
                 <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 text-xs font-semibold">
                     <button id="tab-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all">List</button>
                     <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI Logs</button>
-                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Map</button>
+                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Live Map</button>
                 </div>
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
                     🔄 <span id="status-text">Sync</span>
@@ -33,21 +32,16 @@
 
         <!-- ==================== VIEW 1: SHOPPING LIST ==================== -->
         <div id="view-list" class="space-y-6">
-            <!-- Section 1: Quick Staples Grid Card with Active Search Bar -->
+            <!-- Quick Staples Grid Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
-                <div class="w-full flex items-center justify-between">
-                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Quick Add Staples</h2>
-                </div>
+                <h2 class="text-lg font-bold text-slate-800 tracking-tight">Quick Add Staples</h2>
                 <input type="text" id="search-input" placeholder="Search staples (e.g., milk, chicken)..." 
                     class="w-full bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
                     oninput="handleSearch(this.value)">
-                
-                <div id="staples-container" class="grid grid-cols-3 gap-3">
-                    <!-- Rendered via JS -->
-                </div>
+                <div id="staples-container" class="grid grid-cols-3 gap-3"></div>
             </div>
 
-            <!-- Section 2: Custom Item Card -->
+            <!-- Custom Item Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <h2 class="text-lg font-bold text-slate-800 tracking-tight">Add Custom Item</h2>
                 <div class="w-full flex flex-col sm:flex-row gap-2">
@@ -55,25 +49,13 @@
                         class="w-full sm:flex-grow bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500">
                     <div class="flex gap-2">
                         <select id="custom-cat-input" class="flex-1 sm:w-auto bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none">
-                            <option value="Salad & Vegetables">1. Salad & Veg</option>
-                            <option value="Bananas">2. Bananas</option>
-                            <option value="Health Foods">3. Health Foods</option>
-                            <option value="Berries">4. Berries</option>
-                            <option value="Fresh Produce">5. Fresh Produce</option>
-                            <option value="Fish & Seafood">6. Fish & Seafood</option>
-                            <option value="Household">7. Household</option>
-                            <option value="Drinks">8. Drinks</option>
-                            <option value="Bakery">9. Bakery</option>
-                            <option value="Snacks">10. Snacks</option>
-                            <option value="Coffee & Sugar">11. Coffee & Sugar</option>
-                            <option value="Meat">12. Meat</option>
-                            <option value="Pantry">13. Pantry</option>
-                            <option value="Grains">14. Grains</option>
-                            <option value="Dairy">15. Dairy</option>
-                            <option value="Condiments">16. Condiments</option>
-                            <option value="Juice">17. Juice</option>
-                            <option value="Cheese & Bacon">18. Cheese & Bacon</option>
-                            <option value="Frozen">19. Frozen</option>
+                            <option value="Produce">Produce / Veg</option>
+                            <option value="Bakery">Bakery</option>
+                            <option value="Meat & Fish">Meat & Fish</option>
+                            <option value="Dairy">Dairy</option>
+                            <option value="Aisle Mid">Aisle Mid (Pantry/Grains)</option>
+                            <option value="Frozen">Frozen</option>
+                            <option value="Household">Household</option>
                         </select>
                         <button onclick="addCustomItem()" class="h-10 px-5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 shadow-sm transition-all text-sm shrink-0">
                             Add
@@ -82,15 +64,13 @@
                 </div>
             </div>
 
-            <!-- Section 3: Live Route-Sorted List Card -->
+            <!-- Live List Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-2">
                 <div class="w-full flex items-center justify-between mb-2">
-                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Route Order)</h2>
+                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Check off to auto-pin)</h2>
                     <span id="timestamp-label" class="text-xs font-medium text-slate-400">Last updated: Never</span>
                 </div>
-                <div id="list-container" class="space-y-1">
-                    <!-- Rendered via JS -->
-                </div>
+                <div id="list-container" class="space-y-1"></div>
             </div>
         </div>
 
@@ -100,59 +80,31 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs</h2>
-                        <p class="text-xs text-slate-500">Offline-captured timestamped sequence gaps + dynamic dwell zones.</p>
+                        <p class="text-xs text-slate-500">Chronological check-off coordinates & sequence timestamps.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copyLogsToClipboard()" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">📋 Copy JSON</button>
                         <button onclick="clearTripLogs()" class="bg-red-50 text-red-600 text-xs font-medium px-3 py-2 rounded-xl hover:bg-red-100 transition-all border border-red-200">Clear Logs</button>
                     </div>
                 </div>
-
                 <div class="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-2xl overflow-x-auto max-h-96 leading-relaxed" id="logs-json-output">
                     Loading logs...
-                </div>
-
-                <div class="space-y-2">
-                    <h3 class="text-sm font-semibold text-slate-700">Dynamic Dwell-Cluster Breakdown</h3>
-                    <div id="logs-list-container" class="space-y-2 text-xs text-slate-600">
-                        <!-- Populated via JS -->
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== VIEW 3: BIRD'S-EYE STORE MAP & CALIBRATOR ==================== -->
+        <!-- ==================== VIEW 3: LIVE CHECK-OFF BIRD'S-EYE MAP ==================== -->
         <div id="view-map" class="hidden space-y-6">
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Offline Store Floor Plan Map</h2>
-                        <p class="text-xs text-slate-500">Zero hardcoded coordinates. Calibrate positions offline or view trip path.</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button id="map-mode-toggle" onclick="toggleCalibrationMode()" class="bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-800 transition-all">
-                            🛠️ Calibrate Layout
-                        </button>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Auto-Generated Walk Path</h2>
+                        <p class="text-xs text-slate-500">Pins drop automatically in sequence as you check off items.</p>
                     </div>
                 </div>
-
-                <!-- Calibration Controls (Hidden by default) -->
-                <div id="calibration-bar" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3 space-y-2 text-xs">
-                    <div class="flex items-center justify-between flex-wrap gap-2">
-                        <span class="font-bold text-amber-900">Calibration Mode Active: Tap map to place selected zone</span>
-                        <button onclick="clearCalibrationCoords()" class="text-red-600 font-medium underline">Reset Layout</button>
-                    </div>
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <span class="text-slate-600 font-medium">Select Route to Drop:</span>
-                        <select id="calibrate-route-select" class="bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-semibold text-slate-800">
-                            <!-- Populated via JS -->
-                        </select>
-                    </div>
-                </div>
-
                 <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 overflow-x-auto flex justify-center">
-                    <svg id="bird-map-svg" viewBox="0 0 740 460" class="w-full max-w-[700px] h-auto select-none cursor-crosshair">
-                        <!-- Rendered via renderMapView() -->
+                    <svg id="bird-map-svg" viewBox="0 0 740 460" class="w-full max-w-[700px] h-auto select-none">
+                        <!-- Rendered via JS -->
                     </svg>
                 </div>
             </div>
@@ -172,173 +124,55 @@
     </div>
 
     <script>
-        const STORE_LAYOUT = {
-            "Salad & Vegetables": 1, "Bananas": 2, "Health Foods": 3, "Berries": 4,
-            "Fresh Produce": 5, "Fish & Seafood": 6, "Household": 7, "Drinks": 8,
-            "Bakery": 9, "Snacks": 10, "Coffee & Sugar": 11, "Meat": 12,
-            "Pantry": 13, "Grains": 14, "Dairy": 15, "Condiments": 16,
-            "Juice": 17, "Cheese & Bacon": 18, "Frozen": 19
-        };
-
-        const REVERSE_STORE_LAYOUT = Object.entries(STORE_LAYOUT).reduce((acc, [cat, num]) => { acc[num] = cat; return acc; }, {});
-
-        // Zero hardcoded spatial coordinates: loaded offline from localStorage or empty object
-        let storeZoneCoords = JSON.parse(localStorage.getItem('grocery_store_coords') || '{}');
-        let isCalibrating = false;
-
-        const raw_staples = [
-            { name: "Spinach", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
-            { name: "Lettuce", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
-            { name: "Tomatoes", category: "Salad & Vegetables", img: "icons8-tomatoes-48.png" },
-            { name: "Lemon", category: "Salad & Vegetables", img: "icons8-lemon-64.png" },
-            { name: "Lime", category: "Salad & Vegetables", img: "icons8-lime-96.png" },
-            { name: "White onions", category: "Salad & Vegetables", img: "icons8-onion-96.png" },
-            { name: "Celery", category: "Salad & Vegetables", img: "icons8-celery-96.png" },
-            { name: "Potatoes", category: "Salad & Vegetables", img: "icons8-potatoes-94.png" },
-            { name: "Carrots", category: "Salad & Vegetables", img: "icons8-carrots-64.png" },
-            { name: "Green beans", category: "Salad & Vegetables", img: "icons8-beans-60.png" },
-            { name: "Bananas", category: "Bananas", img: "icons8-banana-100.png" },
-            { name: "Pumpkin Seeds", category: "Health Foods", img: "icons8-pumkin-64.png" },
-            { name: "Blueberries", category: "Berries", img: "icons8-blueberries-48.png" },
-            { name: "Raspberries", category: "Berries", img: "icons8-raspberry-48.png" },
-            { name: "Mushrooms", category: "Fresh Produce", img: "icons8-mushroom-48.png" },
-            { name: "Cucumber", category: "Fresh Produce", img: "icons8-cucumber-64.png" },
-            { name: "Spring Onion", category: "Fresh Produce", img: "icons8-spring-onion-64.png" },
-            { name: "Garlic", category: "Fresh Produce", img: "icons8-garlic-48.png" },
-            { name: "Peppers", category: "Fresh Produce", img: "icons8-tomatoes-48.png" },
-            { name: "Tendersteam Broccoli", category: "Fresh Produce", img: "icons8-broccoli-100.png" },
-            { name: "Cod", category: "Fish & Seafood", img: "icons8-cod-48.png" },
-            { name: "Salmon", category: "Fish & Seafood", img: "icons8-tuna-67.png" },
-            { name: "Tuna Steak (frozen)", category: "Fish & Seafood", img: "icons8-tuna-67.png" },
-            { name: "Tinned Tuna", category: "Fish & Seafood", img: "icons8-tin-can-64.png" },
-            { name: "Comfort Pure", category: "Household", img: "icons8-bleach-24.png" },
-            { name: "Bleach", category: "Household", img: "icons8-bleach-24.png" },
-            { name: "Bin Liners", category: "Household", img: "icons8-recycle-bin-80.png" },
-            { name: "Squash", category: "Drinks", img: "icons8-juice-64.png" },
-            { name: "Bread", category: "Bakery", img: "icons8-bread-64.png" },
-            { name: "Burger Buns", category: "Bakery", img: "icons8-hamburger-24.png" },
-            { name: "Soreen", category: "Bakery", img: "icons8-barley-100.png" },
-            { name: "KitKats", category: "Snacks", img: "icons8-chocolate-100.png" },
-            { name: "Coffee", category: "Coffee & Sugar", img: "icons8-coffee-48.png" },
-            { name: "Sugar", category: "Coffee & Sugar", img: "icons8-sugar-cube-80.png" },
-            { name: "Sweeteners", category: "Coffee & Sugar", img: "icons8-sweetener-50.png" },
-            { name: "Chicken Breast", category: "Meat", img: "icons8-chicken-breast-64.png" },
-            { name: "Mince Meat", category: "Meat", img: "icons8-ground-beef-100.png" },
-            { name: "Rump Steak", category: "Meat", img: "icons8-rump-steak-64.png" },
-            { name: "Sirloin Steak", category: "Meat", img: "icons8-sirloin-80.png" },
-            { name: "Lamb (diced)", category: "Meat", img: "icons8-lamb-100.png" },
-            { name: "Dolmio Sauce", category: "Pantry", img: "icons8-ketchup-100.png" },
-            { name: "Pasta", category: "Pantry", img: "icons8-spaghetti-48.png" },
-            { name: "Coconut Milk low salt", category: "Pantry", img: "icons8-coconut-milk-100.png" },
-            { name: "Chia seeds", category: "Pantry", img: "icons8-chia-seeds-100.png" },
-            { name: "Eggs", category: "Pantry", img: "icons8-eggs-94.png" },
-            { name: "Detol wipes", category: "Pantry", img: "icons8-wipes-100.png" },
-            { name: "Mango chutney", category: "Pantry", img: "icons8-jar-96.png" },
-            { name: "Spanish Grains", category: "Grains", img: "icons8-spain-48.png" },
-            { name: "Milk", category: "Dairy", img: "icons8-milk-48.png" },
-            { name: "Protein Yogurt", category: "Dairy", img: "icons8-milk-48 (1).png" },
-            { name: "Kefir", category: "Dairy", img: "icons8-milk-48.png" },
-            { name: "Double Cream", category: "Dairy", img: "icons8-yogurt-100.png" },
-            { name: "Olive Oil", category: "Condiments", img: "icons8-olive-oil-24.png" },
-            { name: "Ketchup", category: "Condiments", img: "icons8-ketchup-100.png" },
-            { name: "BBQ Sauce", category: "Condiments", img: "icons8-bbq-sauce-24.png" },
-            { name: "Orange Juice", category: "Juice", img: "icons8-orange-juice-100.png" },
-            { name: "Cheese", category: "Cheese & Bacon", img: "icons8-cheese-94.png" },
-            { name: "Bacon", category: "Cheese & Bacon", img: "icons8-bacon-100.png" },
-            { name: "Mini Magnums", category: "Frozen", img: "icons8-melting-ice-cream-48.png" }
+        // Generic architectural store station nodes mapped sequentially in a standard loop/grid
+        const GENERIC_STORE_NODES = [
+            { id: 1,  x: 100, y: 360, label: "Produce Start" },
+            { id: 2,  x: 200, y: 360, label: "Produce Cont." },
+            { id: 3,  x: 300, y: 360, label: "Bakery / Deli" },
+            { id: 4,  x: 400, y: 360, label: "Meat & Fish" },
+            { id: 5,  x: 500, y: 360, label: "Dairy Wall" },
+            { id: 6,  x: 500, y: 260, label: "Frozen Deep" },
+            { id: 7,  x: 400, y: 260, label: "Aisle Center Right" },
+            { id: 8,  x: 300, y: 260, label: "Aisle Center Mid" },
+            { id: 9,  x: 200, y: 260, label: "Aisle Center Left" },
+            { id: 10, x: 100, y: 260, label: "Household / Misc" },
+            { id: 11, x: 100, y: 160, label: "Exit/Perimeter A" },
+            { id: 12, x: 370, y: 160, label: "Checkout Front" }
         ];
 
-        const staples = [...raw_staples].sort((a, b) => a.name.localeCompare(b.name));
+        const raw_staples = [
+            { name: "Spinach", category: "Produce", img: "" },
+            { name: "Bananas", category: "Produce", img: "" },
+            { name: "Bread", category: "Bakery", img: "" },
+            { name: "Chicken Breast", category: "Meat & Fish", img: "" },
+            { name: "Salmon", category: "Meat & Fish", img: "" },
+            { name: "Milk", category: "Dairy", img: "" },
+            { name: "Pasta", category: "Aisle Mid", img: "" },
+            { name: "Rice / Grains", category: "Aisle Mid", img: "" },
+            { name: "Mini Magnums", category: "Frozen", img: "" },
+            { name: "Bleach", category: "Household", img: "" }
+        ];
+
+        let staples = [...raw_staples].sort((a, b) => a.name.localeCompare(b.name));
         let shoppingList = JSON.parse(localStorage.getItem('grocery_list') || '[]');
         let tripLogs = JSON.parse(localStorage.getItem('grocery_trip_logs') || '[]');
         let lastCheckTimestamp = parseInt(localStorage.getItem('grocery_last_check_ts') || '0', 10);
         let lastUpdatedTime = "Never";
         let searchQuery = "";
+        let checkSequenceCounter = 0;
 
         const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
         const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
 
-        // Setup SVG click listener for calibrating coordinates offline
-        document.getElementById('bird-map-svg').addEventListener('click', (e) => {
-            if (!isCalibrating) return;
-            const routeSelect = document.getElementById('calibrate-route-select');
-            const targetRoute = parseInt(routeSelect.value, 10);
-            if (!targetRoute) return;
-
-            const svg = document.getElementById('bird-map-svg');
-            const pt = svg.createSVGPoint();
-            pt.x = e.clientX;
-            pt.y = e.clientY;
-            const ctm = svg.getScreenCTM().inverse();
-            const svgPoint = pt.matrixTransform(ctm);
-
-            storeZoneCoords[targetRoute] = {
-                x: Math.round(svgPoint.x - 37.5),
-                y: Math.round(svgPoint.y - 22.5)
-            };
-            localStorage.setItem('grocery_store_coords', JSON.stringify(storeZoneCoords));
-            renderMapView();
-        });
-
-        function populateCalibrateDropdown() {
-            const sel = document.getElementById('calibrate-route-select');
-            sel.innerHTML = Array.from({length: 19}, (_, i) => i + 1).map(num => {
-                const placed = storeZoneCoords[num] ? '✓ ' : '';
-                return `<option value="${num}">${placed}Route #${num} (${(REVERSE_STORE_LAYOUT[num] || '').split('&')[0]})</option>`;
-            }).join('');
-        }
-
-        function toggleCalibrationMode() {
-            isCalibrating = !isCalibrating;
-            const bar = document.getElementById('calibration-bar');
-            const btn = document.getElementById('map-mode-toggle');
-            bar.classList.toggle('hidden', !isCalibrating);
-            btn.innerText = isCalibrating ? '✅ Done Calibrating' : '🛠️ Calibrate Layout';
-            btn.className = isCalibrating 
-                ? 'bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-emerald-700 transition-all'
-                : 'bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-800 transition-all';
-            if (isCalibrating) populateCalibrateDropdown();
-            renderMapView();
-        }
-
-        function clearCalibrationCoords() {
-            storeZoneCoords = {};
-            localStorage.removeItem('grocery_store_coords');
-            populateCalibrateDropdown();
-            renderMapView();
-        }
-
         function switchView(viewName) {
-            const listBtn = document.getElementById('tab-list');
-            const logsBtn = document.getElementById('tab-logs');
-            const mapBtn = document.getElementById('tab-map');
-            const listView = document.getElementById('view-list');
-            const logsView = document.getElementById('view-logs');
-            const mapView = document.getElementById('view-map');
-
-            listView.classList.add('hidden');
-            logsView.classList.add('hidden');
-            mapView.classList.add('hidden');
-
-            const activeBtnClass = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
-            const inactiveBtnClass = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
-
-            listBtn.className = inactiveBtnClass;
-            logsBtn.className = inactiveBtnClass;
-            mapBtn.className = inactiveBtnClass;
-
-            if (viewName === 'list') {
-                listView.classList.remove('hidden');
-                listBtn.className = activeBtnClass;
-            } else if (viewName === 'logs') {
-                logsView.classList.remove('hidden');
-                logsBtn.className = activeBtnClass;
-                renderLogsView();
-            } else if (viewName === 'map') {
-                mapView.classList.remove('hidden');
-                mapBtn.className = activeBtnClass;
-                renderMapView();
-            }
+            ['list', 'logs', 'map'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.toggle('hidden', v !== viewName);
+                document.getElementById(`tab-${v}`).className = v === viewName 
+                    ? "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all"
+                    : "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+            });
+            if (viewName === 'logs') renderLogsView();
+            if (viewName === 'map') renderMapView();
         }
 
         function updateTimestamp() {
@@ -361,17 +195,9 @@
             const existing = shoppingList.find(i => i.name.toLowerCase() === stapleData.name.toLowerCase());
             if (existing) {
                 existing.quantity += delta;
-                if (existing.quantity <= 0) {
-                    shoppingList = shoppingList.filter(i => i !== existing);
-                }
+                if (existing.quantity <= 0) shoppingList = shoppingList.filter(i => i !== existing);
             } else if (delta > 0) {
-                shoppingList.push({
-                    name: stapleData.name,
-                    category: stapleData.category,
-                    img: stapleData.img || "",
-                    quantity: delta,
-                    checked: false
-                });
+                shoppingList.push({ name: stapleData.name, category: stapleData.category, quantity: delta, checked: false, pinNodeId: null });
             }
             saveState();
         }
@@ -391,18 +217,24 @@
 
             const now = Date.now();
             if (item.checked) {
+                // Auto-assign next sequential generic node as the pin location upon check-off
+                checkSequenceCounter++;
+                const assignedNodeIdx = (checkSequenceCounter - 1) % GENERIC_STORE_NODES.length;
+                item.pinNodeId = GENERIC_STORE_NODES[assignedNodeIdx].id;
+
                 const deltaSeconds = lastCheckTimestamp > 0 ? Math.round((now - lastCheckTimestamp) / 1000) : 0;
                 tripLogs.push({
                     item: item.name,
                     category: item.category,
-                    routeNum: STORE_LAYOUT[item.category] || null,
+                    assignedNodeId: item.pinNodeId,
+                    sequenceStep: checkSequenceCounter,
                     checkedAtISO: new Date(now).toISOString(),
                     secSincePrevCheck: deltaSeconds
                 });
                 lastCheckTimestamp = now;
             } else {
-                const revIdx = tripLogs.map(l => l.item).lastIndexOf(item.name);
-                if (revIdx > -1) tripLogs.splice(revIdx, 1);
+                item.pinNodeId = null;
+                tripLogs = tripLogs.filter(l => l.item !== item.name);
             }
             saveState();
         }
@@ -414,31 +246,14 @@
 
         function openResetModal() { document.getElementById('reset-modal').classList.remove('hidden'); document.getElementById('reset-modal').classList.add('flex'); }
         function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); document.getElementById('reset-modal').classList.remove('flex'); }
-        function confirmReset() {
-            shoppingList = [];
-            lastUpdatedTime = "Never";
-            closeResetModal();
-            saveState();
-        }
-
-        function clearTripLogs() {
-            tripLogs = [];
-            lastCheckTimestamp = 0;
-            saveState();
-            renderLogsView();
-            renderMapView();
-        }
+        function confirmReset() { shoppingList = []; checkSequenceCounter = 0; closeResetModal(); saveState(); }
+        function clearTripLogs() { tripLogs = []; lastCheckTimestamp = 0; checkSequenceCounter = 0; saveState(); renderLogsView(); renderMapView(); }
 
         function copyLogsToClipboard() {
-            navigator.clipboard.writeText(JSON.stringify(computeDynamicClusters(tripLogs, 90), null, 2)).then(() => {
-                alert('Copied AI route transition logs to clipboard!');
-            });
+            navigator.clipboard.writeText(JSON.stringify(tripLogs, null, 2)).then(() => alert('Copied check-off sequence logs!'));
         }
 
-        function handleSearch(val) {
-            searchQuery = val.toLowerCase();
-            renderStaplesGrid();
-        }
+        function handleSearch(val) { searchQuery = val.toLowerCase(); renderStaplesGrid(); }
 
         function addCustomItem() {
             const input = document.getElementById('custom-name-input');
@@ -446,11 +261,8 @@
             if (!input.value.trim()) return;
             const customName = input.value.trim();
             const existing = shoppingList.find(i => i.name.toLowerCase() === customName.toLowerCase());
-            if (existing) {
-                existing.quantity += 1;
-            } else {
-                shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false });
-            }
+            if (existing) existing.quantity += 1;
+            else shoppingList.push({ name: customName, category: cat, quantity: 1, checked: false, pinNodeId: null });
             input.value = '';
             saveState();
         }
@@ -459,25 +271,22 @@
             const container = document.getElementById('staples-container');
             const filtered = staples.filter(s => s.name.toLowerCase().includes(searchQuery));
             if (!filtered.length) {
-                container.innerHTML = '<div class="text-slate-400 italic text-center col-span-3 py-6 text-sm">No staples match your search.</div>';
+                container.innerHTML = '<div class="text-slate-400 italic text-center col-span-3 py-6 text-sm">No staples match.</div>';
                 return;
             }
-            const safeName = (n) => n.replace(/'/g, "\\'");
             container.innerHTML = filtered.map(staple => {
                 const existing = shoppingList.find(i => i.name.toLowerCase() === staple.name.toLowerCase());
                 const qty = existing ? existing.quantity : 0;
-                const escaped = safeName(staple.name);
-                const imgTag = staple.img ? `<img src="images/${encodeURIComponent(staple.img)}" class="w-9 h-9 object-contain" onerror="this.outerHTML='<span class=\\'text-2xl\\'>📦</span>'">` : `<span class="text-2xl">📦</span>`;
+                const safeName = staple.name.replace(/'/g, "\\'");
                 return `
-                    <div class="p-3 flex flex-col items-center justify-between rounded-2xl transition-all border select-none text-center h-36 bg-white border-slate-200 shadow-sm hover:border-emerald-500">
-                        <div class="items-center justify-center gap-1 cursor-pointer w-full flex-grow flex flex-col" onclick="adjustStapleQtyByName('${escaped}', 1)">
-                            ${imgTag}
+                    <div class="p-3 flex flex-col items-center justify-between rounded-2xl transition-all border select-none text-center h-28 bg-white border-slate-200 shadow-sm hover:border-emerald-500">
+                        <div class="cursor-pointer w-full flex-grow flex flex-col justify-center" onclick="adjustStapleQtyByName('${safeName}', 1)">
                             <span class="text-xs font-medium text-slate-700 leading-tight">${staple.name}</span>
                         </div>
                         <div class="w-full flex items-center justify-center gap-1 bg-slate-50 rounded-xl py-1 border border-slate-100">
-                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${escaped}', -1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">−</button>
+                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${safeName}', -1)" class="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">−</button>
                             <span class="text-xs font-bold text-slate-700 w-4 text-center">${qty}</span>
-                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${escaped}', 1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">+</button>
+                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${safeName}', 1)" class="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">+</button>
                         </div>
                     </div>
                 `;
@@ -489,164 +298,87 @@
             document.getElementById('timestamp-label').innerText = `Last updated: ${lastUpdatedTime}`;
             document.getElementById('reset-btn').classList.toggle('hidden', shoppingList.length === 0);
 
-            const sortedList = [...shoppingList].sort((a, b) => (STORE_LAYOUT[a.category] ?? 99) - (STORE_LAYOUT[b.category] ?? 99));
-
-            if (!sortedList.length) {
-                container.innerHTML = '<div class="text-slate-400 italic text-center py-6 w-full text-sm">No items added yet. Tap items above!</div>';
+            if (!shoppingList.length) {
+                container.innerHTML = '<div class="text-slate-400 italic text-center py-6 w-full text-sm">No items added yet.</div>';
                 return;
             }
 
-            container.innerHTML = sortedList.map((item) => {
-                const realIdx = shoppingList.indexOf(item);
-                const routeNum = STORE_LAYOUT[item.category] || '??';
-                const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-50' : 'bg-slate-50 border-slate-100';
+            container.innerHTML = shoppingList.map((item, idx) => {
+                const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-60' : 'bg-slate-50 border-slate-100';
                 const labelClasses = item.checked ? 'text-slate-400 line-through' : 'text-slate-700';
-                const imgTag = item.img ? `<img src="images/${encodeURIComponent(item.img)}" class="w-6 h-6 object-contain" onerror="this.outerHTML='<span class=\\'text-lg\\'>🛒</span>'">` : `<span class="text-lg">🛒</span>`;
+                const pinBadge = item.pinNodeId ? `📍 Pin Node #${item.pinNodeId}` : 'Tap checkbox to drop pin';
                 return `
                     <div class="w-full items-center justify-between border px-4 py-3 rounded-xl shadow-sm mb-2 transition-all flex ${rowClasses}">
-                        <div class="items-center gap-3 flex-grow cursor-pointer select-none flex" onclick="toggleCheckByIndex(${realIdx})">
-                            ${imgTag}
+                        <div class="items-center gap-3 flex-grow cursor-pointer select-none flex" onclick="toggleCheckByIndex(${idx})">
+                            <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 accent-emerald-600 pointer-events-none">
                             <div>
                                 <div class="text-base font-medium ${labelClasses}">${item.name}</div>
-                                <div class="text-[11px] text-slate-400">Route #${routeNum} • ${item.category}</div>
+                                <div class="text-[11px] text-emerald-700 font-medium">${pinBadge}</div>
                             </div>
                         </div>
                         <div class="items-center gap-1 flex">
-                            <button onclick="event.stopPropagation(); changeListQtyByIndex(${realIdx}, -1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold text-sm">−</button>
+                            <button onclick="event.stopPropagation(); changeListQtyByIndex(${idx}, -1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold text-sm">−</button>
                             <span class="text-sm font-semibold w-5 text-center">${item.quantity}</span>
-                            <button onclick="event.stopPropagation(); changeListQtyByIndex(${realIdx}, 1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold text-sm">+</button>
-                            <button onclick="event.stopPropagation(); removeItemByIndex(${realIdx})" class="w-7 h-7 flex items-center justify-center rounded text-slate-400 hover:text-red-500 text-sm">✕</button>
+                            <button onclick="event.stopPropagation(); changeListQtyByIndex(${idx}, 1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold text-sm">+</button>
+                            <button onclick="event.stopPropagation(); removeItemByIndex(${idx})" class="w-7 h-7 flex items-center justify-center rounded text-slate-400 hover:text-red-500 text-sm">✕</button>
                         </div>
                     </div>
                 `;
             }).join('');
-        }
-
-        function computeDynamicClusters(logs, dwellThresholdSec = 90) {
-            let clusterId = 1;
-            let prevTime = null;
-            return logs.map((log, index) => {
-                const logTime = new Date(log.checkedAtISO || Date.now()).getTime();
-                if (index > 0 && prevTime && (logTime - prevTime) / 1000 > dwellThresholdSec) {
-                    clusterId++;
-                }
-                prevTime = logTime;
-                const prevItem = index > 0 ? logs[index - 1].item : 'Start';
-                return {
-                    ...log,
-                    dynamicCluster: `zone_${clusterId}`,
-                    relPrevItem: prevItem
-                };
-            });
         }
 
         function renderLogsView() {
-            const jsonOutput = document.getElementById('logs-json-output');
-            const listContainer = document.getElementById('logs-list-container');
-            
-            const clusteredLogs = computeDynamicClusters(tripLogs, 90);
-            jsonOutput.innerText = JSON.stringify(clusteredLogs, null, 2);
-
-            if (!clusteredLogs.length) {
-                listContainer.innerHTML = '<div class="text-slate-400 italic">No transition logs recorded yet. Check off items while shopping!</div>';
-                return;
-            }
-
-            listContainer.innerHTML = [...clusteredLogs].reverse().map(l => {
-                const anchorBadge = `📍 [${l.dynamicCluster}] following "${l.relPrevItem}"`;
-
-                return `
-                    <div class="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-xl">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <span class="font-semibold text-slate-800">${l.item}</span> 
-                                <span class="text-slate-400 text-xs">(${l.category}, Route #${l.routeNum || '?'})</span>
-                            </div>
-                            <div class="font-mono text-slate-500 text-xs">+${l.secSincePrevCheck}s gap</div>
-                        </div>
-                        <div class="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit border border-emerald-100">
-                            ${anchorBadge}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            document.getElementById('logs-json-output').innerText = JSON.stringify(tripLogs, null, 2);
         }
 
         function renderMapView() {
             const svg = document.getElementById('bird-map-svg');
-            const clusteredLogs = computeDynamicClusters(tripLogs, 90);
-            const w = 75;
-            const h = 45;
-            
-            const visitOrderMap = {};
-            const orderedVisitedCoords = [];
-            
-            clusteredLogs.forEach((l, idx) => {
-                if (l.routeNum) {
-                    if (!visitOrderMap[l.routeNum]) {
-                        visitOrderMap[l.routeNum] = idx + 1;
-                    }
-                    const c = storeZoneCoords[l.routeNum];
-                    if (c && !orderedVisitedCoords.some(pt => pt.num === l.routeNum)) {
-                        orderedVisitedCoords.push({ num: l.routeNum, x: c.x + w/2, y: c.y + h/2, step: idx + 1 });
-                    }
+            let svgContent = `
+                <rect x="40" y="80" width="630" height="340" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="4"></rect>
+                <text x="370" y="429" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle">ENTRANCE / CHECKOUT ⬇</text>
+            `;
+
+            // Draw generic floor nodes
+            GENERIC_STORE_NODES.forEach(node => {
+                svgContent += `
+                    <g transform="translate(${node.x - 30}, ${node.y - 15})">
+                        <rect width="60" height="30" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"></rect>
+                        <text x="30" y="18" font-size="8" fill="#64748b" text-anchor="middle">${node.label.split(' ')[0]}</text>
+                    </g>
+                `;
+            });
+
+            // Connect checked sequence steps via auto-polypline
+            const checkedItemsWithNodes = tripLogs.filter(l => l.assignedNodeId);
+            if (checkedItemsWithNodes.length > 1) {
+                const pts = checkedItemsWithNodes.map(l => {
+                    const n = GENERIC_STORE_NODES.find(node => node.id === l.assignedNodeId);
+                    return n ? `${n.x},${n.y}` : '';
+                }).filter(Boolean).join(' ');
+                svgContent += `<polyline points="${pts}" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="5,3"></polyline>`;
+            }
+
+            // Drop step numbered pin badges on nodes where items were checked off
+            checkedItemsWithNodes.forEach(log => {
+                const node = GENERIC_STORE_NODES.find(n => n.id === log.assignedNodeId);
+                if (node) {
+                    svgContent += `
+                        <g transform="translate(${node.x - 12}, ${node.y - 12})">
+                            <circle cx="12" cy="12" r="11" fill="#0f172a" stroke="#10b981" stroke-width="2"></circle>
+                            <text x="12" y="15" font-size="8" font-weight="bold" fill="#10b981" text-anchor="middle">#${log.sequenceStep}</text>
+                        </g>
+                    `;
                 }
             });
 
-            let svgContent = `
-                <!-- Outer Store Perimeter Wall -->
-                <rect x="40" y="80" width="630" height="340" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="4"></rect>
-                
-                <!-- Entrance / Checkout Front Portal -->
-                <rect x="270" y="415" width="200" height="20" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"></rect>
-                <text x="370" y="429" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle">CHECKOUTS / ENTRANCE ⬇</text>
-            `;
-
-            // Draw polyline connecting visited & calibrated coordinates
-            if (orderedVisitedCoords.length > 1) {
-                const pointsStr = orderedVisitedCoords.map(p => `${p.x},${p.y}`).join(' ');
-                svgContent += `<polyline points="${pointsStr}" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="6,4" opacity="0.8"></polyline>`;
-            }
-
-            // Render all calibrated zones or uncalibrated placeholder guidance
-            const placedKeys = Object.keys(storeZoneCoords);
-            if (!placedKeys.length && !isCalibrating) {
+            if (!checkedItemsWithNodes.length) {
                 svgContent += `
                     <g transform="translate(355, 230)">
-                        <rect x="-170" y="-22" width="340" height="44" rx="10" fill="#ffffff" stroke="#e2e8f0"></rect>
-                        <text x="0" y="4" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">No calibrated zones yet — tap "Calibrate Layout" above!</text>
+                        <rect x="-140" y="-22" width="280" height="44" rx="10" fill="#ffffff" stroke="#e2e8f0"></rect>
+                        <text x="0" y="4" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">Check off list items to auto-drop sequence pins!</text>
                     </g>
                 `;
-            } else {
-                Object.entries(storeZoneCoords).forEach(([rNumStr, coords]) => {
-                    const rNum = parseInt(rNumStr, 10);
-                    const stepNum = visitOrderMap[rNum];
-                    const isVisited = stepNum !== undefined;
-                    const catName = REVERSE_STORE_LAYOUT[rNum] || `Zone ${rNum}`;
-
-                    const fillCol = isVisited ? '#d1fae5' : '#f8fafc';
-                    const strokeCol = isVisited ? '#059669' : '#cbd5e1';
-                    const textCol = isVisited ? '#065f46' : '#64748b';
-
-                    svgContent += `
-                        <g transform="translate(${coords.x}, ${coords.y})">
-                            <rect width="${w}" height="${h}" rx="8" fill="${fillCol}" stroke="${strokeCol}" stroke-width="${isVisited ? '2.5' : '1.5'}"></rect>
-                            <text x="${w/2}" y="${h/2 - 4}" font-size="9" font-weight="bold" fill="${textCol}" text-anchor="middle">R#${rNum}</text>
-                            <text x="${w/2}" y="${h/2 + 9}" font-size="8" fill="${textCol}" text-anchor="middle" opacity="0.85">${catName.split('&')[0]}</text>
-                        </g>
-                    `;
-                });
             }
-
-            // Draw chronological Step Badges (#1, #2, etc.) on top of visited aisle centroids
-            orderedVisitedCoords.forEach((pt) => {
-                svgContent += `
-                    <g transform="translate(${pt.x - 14}, ${pt.y - 14})">
-                        <circle cx="14" cy="14" r="13" fill="#0f172a" stroke="#10b981" stroke-width="2.5"></circle>
-                        <text x="14" y="17.5" font-size="9" font-weight="bold" fill="#10b981" text-anchor="middle">#${pt.step}</text>
-                    </g>
-                `;
-            });
 
             svg.innerHTML = svgContent;
         }
@@ -654,12 +386,8 @@
         function renderAll() {
             renderStaplesGrid();
             renderListDisplay();
-            if (!document.getElementById('view-logs').classList.contains('hidden')) {
-                renderLogsView();
-            }
-            if (!document.getElementById('view-map').classList.contains('hidden')) {
-                renderMapView();
-            }
+            if (!document.getElementById('view-logs').classList.contains('hidden')) renderLogsView();
+            if (!document.getElementById('view-map').classList.contains('hidden')) renderMapView();
         }
 
         async function syncWithCloud() {
@@ -672,17 +400,12 @@
                 if (data.record) {
                     shoppingList = Array.isArray(data.record) ? data.record : (data.record.items || []);
                     if (data.record.tripLogs) tripLogs = data.record.tripLogs;
-                    if (data.record.storeCoords) {
-                        storeZoneCoords = data.record.storeCoords;
-                        localStorage.setItem('grocery_store_coords', JSON.stringify(storeZoneCoords));
-                    }
+                    checkSequenceCounter = tripLogs.length;
                     localStorage.setItem('grocery_list', JSON.stringify(shoppingList));
                     localStorage.setItem('grocery_trip_logs', JSON.stringify(tripLogs));
                     updateTimestamp();
                     renderAll();
                     document.getElementById('status-text').innerText = 'Sync';
-                } else {
-                    document.getElementById('status-text').innerText = 'Err';
                 }
             } catch (e) {
                 document.getElementById('status-text').innerText = 'Err';
@@ -694,12 +417,11 @@
                 await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-                    body: JSON.stringify({ items: shoppingList, tripLogs: tripLogs, storeCoords: storeZoneCoords })
+                    body: JSON.stringify({ items: shoppingList, tripLogs: tripLogs })
                 });
             } catch(e) {}
         }
 
-        // Initial load
         renderAll();
         syncWithCloud();
     </script>
