@@ -356,7 +356,7 @@
                 const existing = shoppingList.find(i => i.name.toLowerCase() === staple.name.toLowerCase());
                 const qty = existing ? existing.quantity : 0;
                 const escaped = safeName(staple.name);
-                const imgTag = staple.img ? `<img src="images/${encodeURIComponent(staple.img)}" class="w-9 h-9 object-contain">` : `<span class="text-2xl">📦</span>`;
+                const imgTag = staple.img ? `<img src="images/${encodeURIComponent(staple.img)}" class="w-9 h-9 object-contain" onerror="this.outerHTML='<span class=\\'text-2xl\\'>📦</span>'">` : `<span class="text-2xl">📦</span>`;
                 return `
                     <div class="p-3 flex flex-col items-center justify-between rounded-2xl transition-all border select-none text-center h-36 bg-white border-slate-200 shadow-sm hover:border-emerald-500">
                         <div class="items-center justify-center gap-1 cursor-pointer w-full flex-grow flex flex-col" onclick="adjustStapleQtyByName('${escaped}', 1)">
@@ -390,7 +390,7 @@
                 const routeNum = STORE_LAYOUT[item.category] || '??';
                 const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-50' : 'bg-slate-50 border-slate-100';
                 const labelClasses = item.checked ? 'text-slate-400 line-through' : 'text-slate-700';
-                const imgTag = item.img ? `<img src="images/${encodeURIComponent(item.img)}" class="w-6 h-6 object-contain">` : `<span class="text-lg">🛒</span>`;
+                const imgTag = item.img ? `<img src="images/${encodeURIComponent(item.img)}" class="w-6 h-6 object-contain" onerror="this.outerHTML='<span class=\\'text-lg\\'>🛒</span>'">` : `<span class="text-lg">🛒</span>`;
                 return `
                     <div class="w-full items-center justify-between border px-4 py-3 rounded-xl shadow-sm mb-2 transition-all flex ${rowClasses}">
                         <div class="items-center gap-3 flex-grow cursor-pointer select-none flex" onclick="toggleCheckByIndex(${realIdx})">
@@ -452,10 +452,9 @@
                     updateTimestamp();
                     renderAll();
                     document.getElementById('status-text').innerText = 'Sync';
+                } else {
+                    document.getElementById('status-text').innerText = 'Err';
                 }
-            } else {
-                document.getElementById('status-text').innerText = 'Err';
-            }
             } catch (e) {
                 document.getElementById('status-text').innerText = 'Err';
             }
