@@ -19,8 +19,11 @@
                 <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 text-xs font-semibold">
                     <button id="tab-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all">List</button>
                     <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI Logs</button>
-                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Live Map</button>
+                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Live GPS Map</button>
                 </div>
+                <button onclick="requestGPSPermission()" id="gps-perm-btn" class="bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-blue-200">
+                    📍 GPS Ready
+                </button>
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
                     🔄 <span id="status-text">Sync</span>
                 </button>
@@ -79,7 +82,7 @@
             <!-- Live List Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-2">
                 <div class="w-full flex items-center justify-between mb-2">
-                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Route Order + Auto-Pin)</h2>
+                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (GPS Pin-Drop on Check)</h2>
                     <span id="timestamp-label" class="text-xs font-medium text-slate-400">Last updated: Never</span>
                 </div>
                 <div id="list-container" class="space-y-1"></div>
@@ -91,8 +94,8 @@
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs</h2>
-                        <p class="text-xs text-slate-500">Chronological check-off coordinates & sequence timestamps.</p>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs (+ GPS)</h2>
+                        <p class="text-xs text-slate-500">Chronological check-off coordinates, GPS lat/lng, & accuracy.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copyLogsToClipboard()" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">📋 Copy JSON</button>
@@ -105,17 +108,17 @@
             </div>
         </div>
 
-        <!-- ==================== VIEW 3: LIVE CHECK-OFF BIRD'S-EYE MAP ==================== -->
+        <!-- ==================== VIEW 3: LIVE GPS COORDINATES TRACE ==================== -->
         <div id="view-map" class="hidden space-y-6">
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Auto-Generated Walk Path</h2>
-                        <p class="text-xs text-slate-500">Pins drop automatically in sequence as you check off items.</p>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Real-Time GPS Check-Off Trace</h2>
+                        <p class="text-xs text-slate-500">Live device latitude/longitude recorded when crossing off list items.</p>
                     </div>
                 </div>
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 overflow-x-auto flex justify-center">
-                    <svg id="bird-map-svg" viewBox="0 0 740 460" class="w-full max-w-[700px] h-auto select-none"></svg>
+                <div id="gps-trace-container" class="space-y-2 bg-slate-50 border border-slate-200 rounded-2xl p-4 font-mono text-xs">
+                    No GPS coordinates captured yet. Check off items while location permission is enabled.
                 </div>
             </div>
         </div>
@@ -141,29 +144,6 @@
             "Pantry": 13, "Grains": 14, "Dairy": 15, "Condiments": 16,
             "Juice": 17, "Cheese & Bacon": 18, "Frozen": 19
         };
-
-        // Generic sequential node placement map around a standard store layout
-        const GENERIC_STORE_NODES = [
-            { id: 1,  x: 100, y: 360, label: "Salad/Veg" },
-            { id: 2,  x: 160, y: 360, label: "Bananas" },
-            { id: 3,  x: 220, y: 360, label: "Health" },
-            { id: 4,  x: 280, y: 360, label: "Berries" },
-            { id: 5,  x: 340, y: 360, label: "Produce" },
-            { id: 6,  x: 400, y: 360, label: "Fish" },
-            { id: 7,  x: 460, y: 360, label: "Household" },
-            { id: 8,  x: 520, y: 360, label: "Drinks" },
-            { id: 9,  x: 520, y: 280, label: "Bakery" },
-            { id: 10, x: 460, y: 280, label: "Snacks" },
-            { id: 11, x: 400, y: 280, label: "Coffee" },
-            { id: 12, x: 340, y: 280, label: "Meat" },
-            { id: 13, x: 280, y: 280, label: "Pantry" },
-            { id: 14, x: 220, y: 280, label: "Grains" },
-            { id: 15, x: 160, y: 280, label: "Dairy" },
-            { id: 16, x: 100, y: 280, label: "Condiments" },
-            { id: 17, x: 100, y: 200, label: "Juice" },
-            { id: 18, x: 300, y: 200, label: "Cheese & Bacon" },
-            { id: 19, x: 500, y: 200, label: "Frozen" }
-        ];
 
         const raw_staples = [
             { name: "Spinach", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
@@ -238,6 +218,23 @@
         const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
         const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
 
+        function requestGPSPermission() {
+            if (!navigator.geolocation) {
+                alert('Geolocation not supported by browser.');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Active (${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)})`;
+                    document.getElementById('gps-perm-btn').className = "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200";
+                },
+                (err) => {
+                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Denied/Err`;
+                },
+                { enableHighAccuracy: true }
+            );
+        }
+
         function switchView(viewName) {
             ['list', 'logs', 'map'].forEach(v => {
                 document.getElementById(`view-${v}`).classList.toggle('hidden', v !== viewName);
@@ -271,7 +268,7 @@
                 existing.quantity += delta;
                 if (existing.quantity <= 0) shoppingList = shoppingList.filter(i => i !== existing);
             } else if (delta > 0) {
-                shoppingList.push({ name: stapleData.name, category: stapleData.category, img: stapleData.img || "", quantity: delta, checked: false, pinNodeId: null });
+                shoppingList.push({ name: stapleData.name, category: stapleData.category, img: stapleData.img || "", quantity: delta, checked: false, gpsPin: null });
             }
             saveState();
         }
@@ -291,21 +288,38 @@
             const now = Date.now();
             if (item.checked) {
                 checkSequenceCounter++;
-                const routeNum = STORE_LAYOUT[item.category] || 1;
-                item.pinNodeId = routeNum;
                 const deltaSeconds = lastCheckTimestamp > 0 ? Math.round((now - lastCheckTimestamp) / 1000) : 0;
-                tripLogs.push({
+                
+                const logEntry = {
                     item: item.name,
                     category: item.category,
-                    routeNum: routeNum,
-                    assignedNodeId: item.pinNodeId,
+                    routeNum: STORE_LAYOUT[item.category] || 1,
                     sequenceStep: checkSequenceCounter,
                     checkedAtISO: new Date(now).toISOString(),
-                    secSincePrevCheck: deltaSeconds
-                });
+                    secSincePrevCheck: deltaSeconds,
+                    gps: null
+                };
+                tripLogs.push(logEntry);
                 lastCheckTimestamp = now;
+
+                // Grab live device GPS location immediately
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            logEntry.gps = {
+                                lat: pos.coords.latitude,
+                                lng: pos.coords.longitude,
+                                accuracyMeters: Math.round(pos.coords.accuracy)
+                            };
+                            item.gpsPin = logEntry.gps;
+                            saveState();
+                        },
+                        () => {},
+                        { enableHighAccuracy: true, timeout: 4000 }
+                    );
+                }
             } else {
-                item.pinNodeId = null;
+                item.gpsPin = null;
                 tripLogs = tripLogs.filter(l => l.item !== item.name);
             }
             saveState();
@@ -330,7 +344,7 @@
             const customName = input.value.trim();
             const existing = shoppingList.find(i => i.name.toLowerCase() === customName.toLowerCase());
             if (existing) existing.quantity += 1;
-            else shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false, pinNodeId: null });
+            else shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false, gpsPin: null });
             input.value = '';
             saveState();
         }
@@ -381,7 +395,9 @@
                 const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-60' : 'bg-slate-50 border-slate-100';
                 const labelClasses = item.checked ? 'text-slate-400 line-through' : 'text-slate-700';
                 const imgTag = item.img ? `<img src="images/${encodeURIComponent(item.img)}" class="w-6 h-6 object-contain" onerror="this.outerHTML='<span class=\\'text-lg\\'>🛒</span>'">` : `<span class="text-lg">🛒</span>`;
-                const pinBadge = item.checked ? `📍 Auto-Pinned Sequence #${item.pinNodeId}` : `Route #${routeNum} • ${item.category}`;
+                const pinBadge = item.checked && item.gpsPin 
+                    ? `📍 GPS ${item.gpsPin.lat.toFixed(4)}, ${item.gpsPin.lng.toFixed(4)} (±${item.gpsPin.accuracyMeters}m)`
+                    : (item.checked ? `📍 Checked (GPS pending...)` : `Route #${routeNum} • ${item.category}`);
 
                 return `
                     <div class="w-full items-center justify-between border px-4 py-3 rounded-xl shadow-sm mb-2 transition-all flex ${rowClasses}">
@@ -408,52 +424,22 @@
         }
 
         function renderMapView() {
-            const svg = document.getElementById('bird-map-svg');
-            let svgContent = `
-                <rect x="40" y="80" width="630" height="340" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="4"></rect>
-                <text x="370" y="429" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle">ENTRANCE / CHECKOUT ⬇</text>
-            `;
-
-            GENERIC_STORE_NODES.forEach(node => {
-                svgContent += `
-                    <g transform="translate(${node.x - 28}, ${node.y - 12})">
-                        <rect width="56" height="24" rx="5" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"></rect>
-                        <text x="28" y="15" font-size="7.5" fill="#64748b" text-anchor="middle">${node.label.split('&')[0]}</text>
-                    </g>
-                `;
-            });
-
-            const checkedItemsWithNodes = tripLogs.filter(l => l.assignedNodeId);
-            if (checkedItemsWithNodes.length > 1) {
-                const pts = checkedItemsWithNodes.map(l => {
-                    const n = GENERIC_STORE_NODES.find(node => node.id === (STORE_LAYOUT[l.category] || 1));
-                    return n ? `${n.x},${n.y}` : '';
-                }).filter(Boolean).join(' ');
-                svgContent += `<polyline points="${pts}" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="5,3"></polyline>`;
+            const container = document.getElementById('gps-trace-container');
+            const gpsLogs = tripLogs.filter(l => l.gps);
+            if (!gpsLogs.length) {
+                container.innerHTML = 'No GPS coordinates captured yet. Check off items while location permission is enabled.';
+                return;
             }
-
-            checkedItemsWithNodes.forEach(log => {
-                const node = GENERIC_STORE_NODES.find(n => n.id === (STORE_LAYOUT[log.category] || 1));
-                if (node) {
-                    svgContent += `
-                        <g transform="translate(${node.x - 11}, ${node.y - 11})">
-                            <circle cx="11" cy="11" r="10" fill="#0f172a" stroke="#10b981" stroke-width="2"></circle>
-                            <text x="11" y="14" font-size="7.5" font-weight="bold" fill="#10b981" text-anchor="middle">#${log.sequenceStep}</text>
-                        </g>
-                    `;
-                }
-            });
-
-            if (!checkedItemsWithNodes.length) {
-                svgContent += `
-                    <g transform="translate(355, 230)">
-                        <rect x="-140" y="-22" width="280" height="44" rx="10" fill="#ffffff" stroke="#e2e8f0"></rect>
-                        <text x="0" y="4" font-size="11" font-weight="600" fill="#64748b" text-anchor="middle">Check off list items to auto-drop sequence pins!</text>
-                    </g>
-                `;
-            }
-
-            svg.innerHTML = svgContent;
+            container.innerHTML = gpsLogs.map(l => `
+                <div class="p-2 border-b border-slate-200 flex justify-between items-center">
+                    <div>
+                        <span class="font-bold text-emerald-700">Step #${l.sequenceStep}:</span> ${l.item}
+                    </div>
+                    <div class="text-slate-600 text-[11px]">
+                        LAT: ${l.gps.lat.toFixed(5)}, LNG: ${l.gps.lng.toFixed(5)} <span class="text-slate-400">(±${l.gps.accuracyMeters}m)</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function renderAll() {
