@@ -54,10 +54,24 @@
                         class="w-full sm:flex-grow bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500">
                     <div class="flex gap-2">
                         <select id="custom-cat-input" class="flex-1 sm:w-auto bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none">
-                            <option value="Pantry">13. Pantry</option>
-                            <option value="Dairy">15. Dairy</option>
                             <option value="Salad & Vegetables">1. Salad & Veg</option>
+                            <option value="Bananas">2. Bananas</option>
+                            <option value="Health Foods">3. Health Foods</option>
+                            <option value="Berries">4. Berries</option>
+                            <option value="Fresh Produce">5. Fresh Produce</option>
+                            <option value="Fish & Seafood">6. Fish & Seafood</option>
+                            <option value="Household">7. Household</option>
+                            <option value="Drinks">8. Drinks</option>
+                            <option value="Bakery">9. Bakery</option>
+                            <option value="Snacks">10. Snacks</option>
+                            <option value="Coffee & Sugar">11. Coffee & Sugar</option>
                             <option value="Meat">12. Meat</option>
+                            <option value="Pantry">13. Pantry</option>
+                            <option value="Grains">14. Grains</option>
+                            <option value="Dairy">15. Dairy</option>
+                            <option value="Condiments">16. Condiments</option>
+                            <option value="Juice">17. Juice</option>
+                            <option value="Cheese & Bacon">18. Cheese & Bacon</option>
                             <option value="Frozen">19. Frozen</option>
                         </select>
                         <button onclick="addCustomItem()" class="h-10 px-5 bg-slate-900 text-white font-medium rounded-xl hover:bg-slate-800 shadow-sm transition-all text-sm shrink-0">
@@ -132,6 +146,12 @@
             { name: "Spinach", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
             { name: "Lettuce", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
             { name: "Tomatoes", category: "Salad & Vegetables", img: "icons8-tomatoes-48.png" },
+            { name: "Lemon", category: "Salad & Vegetables", img: "" },
+            { name: "White onions", category: "Salad & Vegetables", img: "" },
+            { name: "Celery", category: "Salad & Vegetables", img: "" },
+            { name: "Potatoes", category: "Salad & Vegetables", img: "" },
+            { name: "Carrots", category: "Salad & Vegetables", img: "" },
+            { name: "Green beans", category: "Salad & Vegetables", img: "" },
             { name: "Bananas", category: "Bananas", img: "icons8-banana-100.png" },
             { name: "Pumpkin Seeds", category: "Health Foods", img: "icons8-pumkin-64.png" },
             { name: "Blueberries", category: "Berries", img: "icons8-blueberries-48.png" },
@@ -159,12 +179,19 @@
             { name: "Chicken Breast", category: "Meat", img: "icons8-chicken-breast-64.png" },
             { name: "Mince Meat", category: "Meat", img: "icons8-ground-beef-100.png" },
             { name: "Beef", category: "Meat", img: "icons8-beef-48.png" },
+            { name: "Lamb diced", category: "Meat", img: "" },
             { name: "Dolmio Sauce", category: "Pantry", img: "icons8-ketchup-100.png" },
             { name: "Pasta", category: "Pantry", img: "icons8-spaghetti-48.png" },
+            { name: "Coconut Milk low salt", category: "Pantry", img: "" },
+            { name: "Chia seeds", category: "Pantry", img: "" },
+            { name: "Eggs", category: "Pantry", img: "" },
+            { name: "Detol wipes", category: "Pantry", img: "" },
+            { name: "Mango chutney", category: "Pantry", img: "" },
             { name: "Spanish Grains", category: "Grains", img: "icons8-spain-48.png" },
             { name: "Milk", category: "Dairy", img: "icons8-milk-48.png" },
             { name: "Protein Yogurt", category: "Dairy", img: "icons8-milk-48 (1).png" },
             { name: "Kefir", category: "Dairy", img: "icons8-milk-48.png" },
+            { name: "Double Cream", category: "Dairy", img: "" },
             { name: "Olive Oil", category: "Condiments", img: "icons8-olive-oil-24.png" },
             { name: "Ketchup", category: "Condiments", img: "icons8-ketchup-100.png" },
             { name: "BBQ Sauce", category: "Condiments", img: "icons8-bbq-sauce-24.png" },
@@ -264,7 +291,6 @@
                 });
                 lastCheckTimestamp = now;
             } else {
-                // Remove last matching entry for this item if unchecking
                 const revIdx = tripLogs.map(l => l.item).lastIndexOf(item.name);
                 if (revIdx > -1) tripLogs.splice(revIdx, 1);
             }
@@ -427,6 +453,9 @@
                     renderAll();
                     document.getElementById('status-text').innerText = 'Sync';
                 }
+            } else {
+                document.getElementById('status-text').innerText = 'Err';
+            }
             } catch (e) {
                 document.getElementById('status-text').innerText = 'Err';
             }
