@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen pb-12">
-    <div class="w-full max-w-3xl mx-auto p-4 md:p-8 space-y-6">
+    <div class="w-full max-w-2xl mx-auto p-4 md:p-8 space-y-6">
         
         <!-- App Header Bar with View Switcher -->
         <div class="w-full flex items-center justify-between py-2 flex-wrap gap-3">
@@ -16,14 +16,11 @@
                 <h1 class="text-2xl font-bold tracking-tight text-slate-800">Family Grocery</h1>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
+                <!-- View Tabs -->
                 <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 text-xs font-semibold">
                     <button id="tab-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all">List</button>
                     <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI Logs</button>
-                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Location Map</button>
                 </div>
-                <button onclick="requestGPSPermission()" id="gps-perm-btn" class="bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-blue-200">
-                    📍 Enable GPS
-                </button>
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
                     🔄 <span id="status-text">Sync</span>
                 </button>
@@ -35,16 +32,21 @@
 
         <!-- ==================== VIEW 1: SHOPPING LIST ==================== -->
         <div id="view-list" class="space-y-6">
-            <!-- Quick Staples Grid Card -->
+            <!-- Section 1: Quick Staples Grid Card with Active Search Bar -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
-                <h2 class="text-lg font-bold text-slate-800 tracking-tight">Quick Add Staples</h2>
-                <input type="text" id="search-input" placeholder="Search staples (e.g., spinach, milk)..." 
+                <div class="w-full flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Quick Add Staples</h2>
+                </div>
+                <input type="text" id="search-input" placeholder="Search staples (e.g., milk, chicken)..." 
                     class="w-full bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
                     oninput="handleSearch(this.value)">
-                <div id="staples-container" class="grid grid-cols-3 gap-3"></div>
+                
+                <div id="staples-container" class="grid grid-cols-3 gap-3">
+                    <!-- Rendered via JS -->
+                </div>
             </div>
 
-            <!-- Custom Item Card -->
+            <!-- Section 2: Custom Item Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <h2 class="text-lg font-bold text-slate-800 tracking-tight">Add Custom Item</h2>
                 <div class="w-full flex flex-col sm:flex-row gap-2">
@@ -79,13 +81,15 @@
                 </div>
             </div>
 
-            <!-- Live List Card -->
+            <!-- Section 3: Live Route-Sorted List Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-2">
                 <div class="w-full flex items-center justify-between mb-2">
-                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Instant Location Tag on Check)</h2>
+                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Route Order)</h2>
                     <span id="timestamp-label" class="text-xs font-medium text-slate-400">Last updated: Never</span>
                 </div>
-                <div id="list-container" class="space-y-1"></div>
+                <div id="list-container" class="space-y-1">
+                    <!-- Rendered via JS -->
+                </div>
             </div>
         </div>
 
@@ -95,47 +99,27 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs</h2>
-                        <p class="text-xs text-slate-500">Chronological check-off coordinates, sequence, and actual location stamp.</p>
+                        <p class="text-xs text-slate-500">Offline-captured timestamped sequence gaps for route training.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copyLogsToClipboard()" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">📋 Copy JSON</button>
                         <button onclick="clearTripLogs()" class="bg-red-50 text-red-600 text-xs font-medium px-3 py-2 rounded-xl hover:bg-red-100 transition-all border border-red-200">Clear Logs</button>
                     </div>
                 </div>
+
                 <div class="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-2xl overflow-x-auto max-h-96 leading-relaxed" id="logs-json-output">
                     Loading logs...
                 </div>
-            </div>
-        </div>
 
-        <!-- ==================== VIEW 3: LIVE LOCATION TRACE ==================== -->
-        <div id="view-map" class="hidden space-y-6">
-            <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
-                <div class="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Check-Off Location Trace</h2>
-                        <p class="text-xs text-slate-500">Recorded coordinates or active indoor location stamps.</p>
+                <div class="space-y-2">
+                    <h3 class="text-sm font-semibold text-slate-700">Recent Transitions Breakdown</h3>
+                    <div id="logs-list-container" class="space-y-2 text-xs text-slate-600">
+                        <!-- Populated via JS -->
                     </div>
                 </div>
-                <div id="gps-trace-container" class="space-y-2 bg-slate-50 border border-slate-200 rounded-2xl p-4 font-mono text-xs">
-                    No location captured yet. Check off items on the list.
-                </div>
             </div>
         </div>
 
-    </div>
-
-    <!-- Manual Location Modal Fallback -->
-    <div id="loc-modal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4">
-        <div class="bg-white p-6 gap-4 items-center rounded-2xl shadow-xl max-w-sm w-full space-y-4 text-center">
-            <h3 class="text-lg font-semibold text-slate-800">Pin Location Tag</h3>
-            <p class="text-xs text-slate-500">GPS timed out/blocked indoors. Pick zone or enter label for: <span id="loc-item-name" class="font-bold"></span></p>
-            <input type="text" id="manual-loc-label" placeholder="e.g., Aisle 4 Mid / Near Bakery Corner" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none">
-            <div class="flex gap-3 justify-center">
-                <button onclick="confirmManualLocation()" class="bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 px-4 py-2 text-sm">Save Stamp</button>
-                <button onclick="closeLocModal()" class="bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 px-4 py-2 text-sm">Cancel</button>
-            </div>
-        </div>
     </div>
 
     <!-- Reset Modal -->
@@ -220,47 +204,34 @@
             { name: "Mini Magnums", category: "Frozen", img: "icons8-melting-ice-cream-48.png" }
         ];
 
-        let staples = [...raw_staples].sort((a, b) => a.name.localeCompare(b.name));
+        const staples = [...raw_staples].sort((a, b) => a.name.localeCompare(b.name));
         let shoppingList = JSON.parse(localStorage.getItem('grocery_list') || '[]');
         let tripLogs = JSON.parse(localStorage.getItem('grocery_trip_logs') || '[]');
         let lastCheckTimestamp = parseInt(localStorage.getItem('grocery_last_check_ts') || '0', 10);
-        let checkSequenceCounter = tripLogs.length;
         let lastUpdatedTime = "Never";
         let searchQuery = "";
-        let activeModalIdx = null;
-
-        let lastKnownGPS = null;
 
         const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
         const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
 
-        function requestGPSPermission() {
-            if (!navigator.geolocation) {
-                alert('Geolocation not supported by browser.');
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    lastKnownGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracyMeters: Math.round(pos.coords.accuracy) };
-                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Active`;
-                    document.getElementById('gps-perm-btn').className = "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200";
-                },
-                (err) => {
-                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Offline/Indoor`;
-                },
-                { enableHighAccuracy: true, timeout: 5000 }
-            );
-        }
-
         function switchView(viewName) {
-            ['list', 'logs', 'map'].forEach(v => {
-                document.getElementById(`view-${v}`).classList.toggle('hidden', v !== viewName);
-                document.getElementById(`tab-${v}`).className = v === viewName 
-                    ? "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all"
-                    : "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
-            });
-            if (viewName === 'logs') renderLogsView();
-            if (viewName === 'map') renderMapView();
+            const listBtn = document.getElementById('tab-list');
+            const logsBtn = document.getElementById('tab-logs');
+            const listView = document.getElementById('view-list');
+            const logsView = document.getElementById('view-logs');
+
+            if (viewName === 'list') {
+                listView.classList.remove('hidden');
+                logsView.classList.add('hidden');
+                listBtn.className = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
+                logsBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+            } else {
+                listView.classList.add('hidden');
+                logsView.classList.remove('hidden');
+                logsBtn.className = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
+                listBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+                renderLogsView();
+            }
         }
 
         function updateTimestamp() {
@@ -283,9 +254,17 @@
             const existing = shoppingList.find(i => i.name.toLowerCase() === stapleData.name.toLowerCase());
             if (existing) {
                 existing.quantity += delta;
-                if (existing.quantity <= 0) shoppingList = shoppingList.filter(i => i !== existing);
+                if (existing.quantity <= 0) {
+                    shoppingList = shoppingList.filter(i => i !== existing);
+                }
             } else if (delta > 0) {
-                shoppingList.push({ name: stapleData.name, category: stapleData.category, img: stapleData.img || "", quantity: delta, checked: false, locationTag: null });
+                shoppingList.push({
+                    name: stapleData.name,
+                    category: stapleData.category,
+                    img: stapleData.img || "",
+                    quantity: delta,
+                    checked: false
+                });
             }
             saveState();
         }
@@ -302,92 +281,56 @@
             const item = shoppingList[idx];
             if (!item) return;
             item.checked = !item.checked;
+
             const now = Date.now();
             if (item.checked) {
-                checkSequenceCounter++;
                 const deltaSeconds = lastCheckTimestamp > 0 ? Math.round((now - lastCheckTimestamp) / 1000) : 0;
-                
-                // Try quick GPS or fall back immediately to category/stamp tag without hanging UI
-                let initialTag = lastKnownGPS 
-                    ? `GPS: ${lastKnownGPS.lat.toFixed(4)}, ${lastKnownGPS.lng.toFixed(4)}` 
-                    : `Checked at ${item.category}`;
-
-                const logEntry = {
+                tripLogs.push({
                     item: item.name,
                     category: item.category,
-                    sequenceStep: checkSequenceCounter,
+                    routeNum: STORE_LAYOUT[item.category] || null,
                     checkedAtISO: new Date(now).toISOString(),
-                    secSincePrevCheck: deltaSeconds,
-                    locationTag: initialTag,
-                    gps: lastKnownGPS
-                };
-                tripLogs.push(logEntry);
-                item.locationTag = initialTag;
-                item.logRef = logEntry;
+                    secSincePrevCheck: deltaSeconds
+                });
                 lastCheckTimestamp = now;
-
-                // Attempt async background GPS update if supported
-                if (navigator.geolocation && !lastKnownGPS) {
-                    navigator.geolocation.getCurrentPosition(
-                        (pos) => {
-                            const gpsData = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracyMeters: Math.round(pos.coords.accuracy) };
-                            lastKnownGPS = gpsData;
-                            logEntry.gps = gpsData;
-                            logEntry.locationTag = `GPS: ${gpsData.lat.toFixed(4)}, ${gpsData.lng.toFixed(4)}`;
-                            item.locationTag = logEntry.locationTag;
-                            saveState();
-                        },
-                        () => {},
-                        { enableHighAccuracy: true, timeout: 3000 }
-                    );
-                }
             } else {
-                item.locationTag = null;
-                tripLogs = tripLogs.filter(l => l.item !== item.name);
+                const revIdx = tripLogs.map(l => l.item).lastIndexOf(item.name);
+                if (revIdx > -1) tripLogs.splice(revIdx, 1);
             }
             saveState();
         }
 
-        function openLocModal(idx, event) {
-            if (event) event.stopPropagation();
-            activeModalIdx = idx;
-            const item = shoppingList[idx];
-            document.getElementById('loc-item-name').innerText = item.name;
-            document.getElementById('manual-loc-label').value = item.locationTag || '';
-            document.getElementById('loc-modal').classList.remove('hidden');
-            document.getElementById('loc-modal').classList.add('flex');
-        }
-
-        function closeLocModal() {
-            document.getElementById('loc-modal').classList.add('hidden');
-            document.getElementById('loc-modal').classList.remove('flex');
-            activeModalIdx = null;
-        }
-
-        function confirmManualLocation() {
-            if (activeModalIdx === null) return;
-            const customTag = document.getElementById('manual-loc-label').value.trim() || 'Manual check stamp';
-            const item = shoppingList[activeModalIdx];
-            item.locationTag = customTag;
-            if (item.checked) {
-                const existingLog = tripLogs.find(l => l.item === item.name && l.sequenceStep === checkSequenceCounter);
-                if (existingLog) existingLog.locationTag = customTag;
-            }
-            closeLocModal();
+        function removeItemByIndex(idx) {
+            shoppingList.splice(idx, 1);
             saveState();
         }
 
-        function removeItemByIndex(idx) { shoppingList.splice(idx, 1); saveState(); }
         function openResetModal() { document.getElementById('reset-modal').classList.remove('hidden'); document.getElementById('reset-modal').classList.add('flex'); }
         function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); document.getElementById('reset-modal').classList.remove('flex'); }
-        function confirmReset() { shoppingList = []; checkSequenceCounter = 0; closeResetModal(); saveState(); }
-        function clearTripLogs() { tripLogs = []; lastCheckTimestamp = 0; checkSequenceCounter = 0; saveState(); renderLogsView(); renderMapView(); }
-
-        function copyLogsToClipboard() {
-            navigator.clipboard.writeText(JSON.stringify(tripLogs, null, 2)).then(() => alert('Copied check-off sequence logs!'));
+        function confirmReset() {
+            shoppingList = [];
+            lastUpdatedTime = "Never";
+            closeResetModal();
+            saveState();
         }
 
-        function handleSearch(val) { searchQuery = val.toLowerCase(); renderStaplesGrid(); }
+        function clearTripLogs() {
+            tripLogs = [];
+            lastCheckTimestamp = 0;
+            saveState();
+            renderLogsView();
+        }
+
+        function copyLogsToClipboard() {
+            navigator.clipboard.writeText(JSON.stringify(tripLogs, null, 2)).then(() => {
+                alert('Copied AI route transition logs to clipboard!');
+            });
+        }
+
+        function handleSearch(val) {
+            searchQuery = val.toLowerCase();
+            renderStaplesGrid();
+        }
 
         function addCustomItem() {
             const input = document.getElementById('custom-name-input');
@@ -395,8 +338,11 @@
             if (!input.value.trim()) return;
             const customName = input.value.trim();
             const existing = shoppingList.find(i => i.name.toLowerCase() === customName.toLowerCase());
-            if (existing) existing.quantity += 1;
-            else shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false, locationTag: null });
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false });
+            }
             input.value = '';
             saveState();
         }
@@ -405,24 +351,25 @@
             const container = document.getElementById('staples-container');
             const filtered = staples.filter(s => s.name.toLowerCase().includes(searchQuery));
             if (!filtered.length) {
-                container.innerHTML = '<div class="text-slate-400 italic text-center col-span-3 py-6 text-sm">No staples match.</div>';
+                container.innerHTML = '<div class="text-slate-400 italic text-center col-span-3 py-6 text-sm">No staples match your search.</div>';
                 return;
             }
+            const safeName = (n) => n.replace(/'/g, "\\'");
             container.innerHTML = filtered.map(staple => {
                 const existing = shoppingList.find(i => i.name.toLowerCase() === staple.name.toLowerCase());
                 const qty = existing ? existing.quantity : 0;
-                const safeName = staple.name.replace(/'/g, "\\'");
-                const imgTag = staple.img ? `<img src="images/${encodeURIComponent(staple.img)}" class="w-8 h-8 object-contain" onerror="this.outerHTML='<span class=\\'text-xl\\'>📦</span>'">` : `<span class="text-xl">📦</span>`;
+                const escaped = safeName(staple.name);
+                const imgTag = staple.img ? `<img src="images/${encodeURIComponent(staple.img)}" class="w-9 h-9 object-contain" onerror="this.outerHTML='<span class=\\'text-2xl\\'>📦</span>'">` : `<span class="text-2xl">📦</span>`;
                 return `
-                    <div class="p-3 flex flex-col items-center justify-between rounded-2xl transition-all border select-none text-center h-32 bg-white border-slate-200 shadow-sm hover:border-emerald-500">
-                        <div class="cursor-pointer w-full flex-grow flex flex-col items-center justify-center gap-1" onclick="adjustStapleQtyByName('${safeName}', 1)">
+                    <div class="p-3 flex flex-col items-center justify-between rounded-2xl transition-all border select-none text-center h-36 bg-white border-slate-200 shadow-sm hover:border-emerald-500">
+                        <div class="items-center justify-center gap-1 cursor-pointer w-full flex-grow flex flex-col" onclick="adjustStapleQtyByName('${escaped}', 1)">
                             ${imgTag}
                             <span class="text-xs font-medium text-slate-700 leading-tight">${staple.name}</span>
                         </div>
                         <div class="w-full flex items-center justify-center gap-1 bg-slate-50 rounded-xl py-1 border border-slate-100">
-                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${safeName}', -1)" class="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">−</button>
+                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${escaped}', -1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">−</button>
                             <span class="text-xs font-bold text-slate-700 w-4 text-center">${qty}</span>
-                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${safeName}', 1)" class="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">+</button>
+                            <button onclick="event.stopPropagation(); adjustStapleQtyByName('${escaped}', 1)" class="w-7 h-7 flex items-center justify-center rounded text-slate-500 hover:bg-slate-200 font-bold">+</button>
                         </div>
                     </div>
                 `;
@@ -437,28 +384,23 @@
             const sortedList = [...shoppingList].sort((a, b) => (STORE_LAYOUT[a.category] ?? 99) - (STORE_LAYOUT[b.category] ?? 99));
 
             if (!sortedList.length) {
-                container.innerHTML = '<div class="text-slate-400 italic text-center py-6 w-full text-sm">No items added yet.</div>';
+                container.innerHTML = '<div class="text-slate-400 italic text-center py-6 w-full text-sm">No items added yet. Tap items above!</div>';
                 return;
             }
 
             container.innerHTML = sortedList.map((item) => {
                 const realIdx = shoppingList.indexOf(item);
                 const routeNum = STORE_LAYOUT[item.category] || '??';
-                const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-75' : 'bg-slate-50 border-slate-100';
+                const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-50' : 'bg-slate-50 border-slate-100';
                 const labelClasses = item.checked ? 'text-slate-400 line-through' : 'text-slate-700';
                 const imgTag = item.img ? `<img src="images/${encodeURIComponent(item.img)}" class="w-6 h-6 object-contain" onerror="this.outerHTML='<span class=\\'text-lg\\'>🛒</span>'">` : `<span class="text-lg">🛒</span>`;
-                
-                const badgeText = item.checked 
-                    ? `📍 ${item.locationTag || 'Checked (tap to edit zone)'}`
-                    : `Default Category: ${item.category}`;
-
                 return `
                     <div class="w-full items-center justify-between border px-4 py-3 rounded-xl shadow-sm mb-2 transition-all flex ${rowClasses}">
                         <div class="items-center gap-3 flex-grow cursor-pointer select-none flex" onclick="toggleCheckByIndex(${realIdx})">
                             ${imgTag}
                             <div>
                                 <div class="text-base font-medium ${labelClasses}">${item.name}</div>
-                                <div onclick="openLocModal(${realIdx}, event); event.stopPropagation();" class="text-[11px] ${item.checked ? 'text-emerald-700 font-semibold underline decoration-dotted cursor-pointer' : 'text-slate-400'}">${badgeText} ✏️</div>
+                                <div class="text-[11px] text-slate-400">Route #${routeNum} • ${item.category}</div>
                             </div>
                         </div>
                         <div class="items-center gap-1 flex">
@@ -473,23 +415,22 @@
         }
 
         function renderLogsView() {
-            document.getElementById('logs-json-output').innerText = JSON.stringify(tripLogs, null, 2);
-        }
+            const jsonOutput = document.getElementById('logs-json-output');
+            const listContainer = document.getElementById('logs-list-container');
+            jsonOutput.innerText = JSON.stringify(tripLogs, null, 2);
 
-        function renderMapView() {
-            const container = document.getElementById('gps-trace-container');
             if (!tripLogs.length) {
-                container.innerHTML = 'No check-off location logs captured yet.';
+                listContainer.innerHTML = '<div class="text-slate-400 italic">No transition logs recorded yet. Check off items while shopping!</div>';
                 return;
             }
-            container.innerHTML = tripLogs.map(l => `
-                <div class="p-2 border-b border-slate-200 flex justify-between items-center">
+
+            listContainer.innerHTML = [...tripLogs].reverse().map(l => `
+                <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl">
                     <div>
-                        <span class="font-bold text-emerald-700">Step #${l.sequenceStep}:</span> ${l.item}
+                        <span class="font-semibold text-slate-800">${l.item}</span> 
+                        <span class="text-slate-400">(${l.category}, Route #${l.routeNum || '?'})</span>
                     </div>
-                    <div class="text-slate-600 text-[11px]">
-                        Tag: <span class="font-semibold text-slate-800">${l.locationTag || 'N/0'}</span>
-                    </div>
+                    <div class="font-mono text-slate-500">+${l.secSincePrevCheck}s gap</div>
                 </div>
             `).join('');
         }
@@ -497,8 +438,6 @@
         function renderAll() {
             renderStaplesGrid();
             renderListDisplay();
-            if (!document.getElementById('view-logs').classList.contains('hidden')) renderLogsView();
-            if (!document.getElementById('view-map').classList.contains('hidden')) renderMapView();
         }
 
         async function syncWithCloud() {
@@ -511,12 +450,13 @@
                 if (data.record) {
                     shoppingList = Array.isArray(data.record) ? data.record : (data.record.items || []);
                     if (data.record.tripLogs) tripLogs = data.record.tripLogs;
-                    checkSequenceCounter = tripLogs.length;
                     localStorage.setItem('grocery_list', JSON.stringify(shoppingList));
                     localStorage.setItem('grocery_trip_logs', JSON.stringify(tripLogs));
                     updateTimestamp();
                     renderAll();
                     document.getElementById('status-text').innerText = 'Sync';
+                } else {
+                    document.getElementById('status-text').innerText = 'Err';
                 }
             } catch (e) {
                 document.getElementById('status-text').innerText = 'Err';
@@ -533,6 +473,7 @@
             } catch(e) {}
         }
 
+        // Initial load
         renderAll();
         syncWithCloud();
     </script>
