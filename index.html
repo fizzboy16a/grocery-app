@@ -20,6 +20,7 @@
                 <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 text-xs font-semibold">
                     <button id="tab-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all">List</button>
                     <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI Logs</button>
+                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Map</button>
                 </div>
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
                     🔄 <span id="status-text">Sync</span>
@@ -116,6 +117,25 @@
                     <div id="logs-list-container" class="space-y-2 text-xs text-slate-600">
                         <!-- Populated via JS -->
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== VIEW 3: STORE MAP ==================== -->
+        <div id="view-map" class="hidden space-y-6">
+            <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Store Grid Map (Step Sequence)</h2>
+                        <p class="text-xs text-slate-500">Highlighted green cells show visited store routes in chronological sequence order.</p>
+                    </div>
+                    <div class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
+                        Green = Visited
+                    </div>
+                </div>
+
+                <div id="map-grid-container" class="grid grid-cols-3 sm:grid-cols-4 gap-2 pt-2">
+                    <!-- Populated via JS -->
                 </div>
             </div>
         </div>
@@ -217,20 +237,33 @@
         function switchView(viewName) {
             const listBtn = document.getElementById('tab-list');
             const logsBtn = document.getElementById('tab-logs');
+            const mapBtn = document.getElementById('tab-map');
             const listView = document.getElementById('view-list');
             const logsView = document.getElementById('view-logs');
+            const mapView = document.getElementById('view-map');
+
+            listView.classList.add('hidden');
+            logsView.classList.add('hidden');
+            mapView.classList.add('hidden');
+
+            const activeBtnClass = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
+            const inactiveBtnClass = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+
+            listBtn.className = inactiveBtnClass;
+            logsBtn.className = inactiveBtnClass;
+            mapBtn.className = inactiveBtnClass;
 
             if (viewName === 'list') {
                 listView.classList.remove('hidden');
-                logsView.classList.add('hidden');
-                listBtn.className = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
-                logsBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
-            } else {
-                listView.classList.add('hidden');
+                listBtn.className = activeBtnClass;
+            } else if (viewName === 'logs') {
                 logsView.classList.remove('hidden');
-                logsBtn.className = "px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all";
-                listBtn.className = "px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+                logsBtn.className = activeBtnClass;
                 renderLogsView();
+            } else if (viewName === 'map') {
+                mapView.classList.remove('hidden');
+                mapBtn.className = activeBtnClass;
+                renderMapView();
             }
         }
 
@@ -319,10 +352,11 @@
             lastCheckTimestamp = 0;
             saveState();
             renderLogsView();
+            renderMapView();
         }
 
         function copyLogsToClipboard() {
-            navigator.clipboard.writeText(JSON.stringify(tripLogs, null, 2)).then(() => {
+            navigator.clipboard.writeText(JSON.stringify(computeDynamicClusters(tripLogs, 90), null, 2)).then(() => {
                 alert('Copied AI route transition logs to clipboard!');
             });
         }
@@ -465,9 +499,55 @@
             }).join('');
         }
 
+        function renderMapView() {
+            const mapContainer = document.getElementById('map-grid-container');
+            const clusteredLogs = computeDynamicClusters(tripLogs, 90);
+            const revLayout = Object.entries(STORE_LAYOUT).reduce((acc, [cat, num]) => { acc[num] = cat; return acc; }, {});
+            
+            const visitOrderMap = {};
+            clusteredLogs.forEach((l, idx) => {
+                if (l.routeNum && !visitOrderMap[l.routeNum]) {
+                    visitOrderMap[l.routeNum] = idx + 1;
+                }
+            });
+
+            if (!clusteredLogs.length) {
+                mapContainer.innerHTML = '<div class="text-slate-400 italic text-center col-span-full py-8 text-sm">No trip data yet. Check off items while shopping!</div>';
+                return;
+            }
+
+            mapContainer.innerHTML = Array.from({ length: 19 }, (_, i) => i + 1).map(num => {
+                const catName = revLayout[num] || `Zone ${num}`;
+                const stepNum = visitOrderMap[num];
+                const isVisited = stepNum !== undefined;
+                
+                const cellClass = isVisited 
+                    ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm font-bold ring-2 ring-emerald-300' 
+                    : 'bg-white text-slate-400 border-slate-200';
+                    
+                const stepBadge = isVisited 
+                    ? `<span class="bg-slate-900/40 text-white rounded-full px-1.5 py-0.5 text-[9px] font-mono leading-none mb-1">Step #${stepNum}</span>` 
+                    : '';
+
+                return `
+                    <div class="p-2 rounded-xl border text-center flex flex-col justify-center items-center h-20 transition-all ${cellClass}">
+                        ${stepBadge}
+                        <span class="text-[10px] font-extrabold">Route #${num}</span>
+                        <span class="truncate w-full text-[9px] opacity-85">${catName.replace('&', '/')}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
         function renderAll() {
             renderStaplesGrid();
             renderListDisplay();
+            if (!document.getElementById('view-logs').classList.contains('hidden')) {
+                renderLogsView();
+            }
+            if (!document.getElementById('view-map').classList.contains('hidden')) {
+                renderMapView();
+            }
         }
 
         async function syncWithCloud() {
