@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 font-sans min-h-screen pb-12">
-    <div class="w-full max-w-2xl mx-auto p-4 md:p-8 space-y-6">
+    <div class="w-full max-w-3xl mx-auto p-4 md:p-8 space-y-6">
         
         <!-- App Header Bar with View Switcher -->
         <div class="w-full flex items-center justify-between py-2 flex-wrap gap-3">
@@ -121,21 +121,24 @@
             </div>
         </div>
 
-        <!-- ==================== VIEW 3: STORE MAP ==================== -->
+        <!-- ==================== VIEW 3: BIRD'S-EYE STORE MAP ==================== -->
         <div id="view-map" class="hidden space-y-6">
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Store Grid Map (Step Sequence)</h2>
-                        <p class="text-xs text-slate-500">Highlighted green cells show visited store routes in chronological sequence order.</p>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Bird's-Eye Store Floor Plan</h2>
+                        <p class="text-xs text-slate-500">Aerial layout showing sequence polyline path and visit step pins across Routes 1–19.</p>
                     </div>
-                    <div class="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
-                        Green = Visited
+                    <div class="flex items-center gap-2 text-[10px] font-semibold">
+                        <span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg border border-emerald-100">Green = Visited Route</span>
+                        <span class="bg-slate-900 text-white px-2 py-1 rounded-lg">Step Pin (#1, #2)</span>
                     </div>
                 </div>
 
-                <div id="map-grid-container" class="grid grid-cols-3 sm:grid-cols-4 gap-2 pt-2">
-                    <!-- Populated via JS -->
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 overflow-x-auto flex justify-center">
+                    <svg id="bird-map-svg" viewBox="0 0 740 460" class="w-full max-w-[700px] h-auto select-none">
+                        <!-- Rendered via renderMapView() -->
+                    </svg>
                 </div>
             </div>
         </div>
@@ -160,6 +163,29 @@
             "Bakery": 9, "Snacks": 10, "Coffee & Sugar": 11, "Meat": 12,
             "Pantry": 13, "Grains": 14, "Dairy": 15, "Condiments": 16,
             "Juice": 17, "Cheese & Bacon": 18, "Frozen": 19
+        };
+
+        // Architectural coordinates (x, y) for bird's-eye store floor plan (740x460 canvas)
+        const STORE_ZONE_COORDS = {
+            1:  { x: 75,  y: 350, label: "1. Salad/Veg", w: 75, h: 45 },
+            2:  { x: 75,  y: 280, label: "2. Bananas", w: 75, h: 45 },
+            3:  { x: 75,  y: 210, label: "3. Health", w: 75, h: 45 },
+            4:  { x: 75,  y: 140, label: "4. Berries", w: 75, h: 45 },
+            5:  { x: 175, y: 140, label: "5. Produce", w: 75, h: 45 },
+            6:  { x: 275, y: 140, label: "6. Seafood", w: 75, h: 45 },
+            7:  { x: 375, y: 140, label: "7. Household", w: 75, h: 45 },
+            8:  { x: 475, y: 140, label: "8. Drinks", w: 75, h: 45 },
+            9:  { x: 575, y: 140, label: "9. Bakery", w: 75, h: 45 },
+            10: { x: 575, y: 210, label: "10. Snacks", w: 75, h: 45 },
+            11: { x: 575, y: 280, label: "11. Coffee", w: 75, h: 45 },
+            12: { x: 575, y: 350, label: "12. Meat", w: 75, h: 45 },
+            13: { x: 475, y: 350, label: "13. Pantry", w: 75, h: 45 },
+            14: { x: 375, y: 350, label: "14. Grains", w: 75, h: 45 },
+            15: { x: 275, y: 350, label: "15. Dairy", w: 75, h: 45 },
+            16: { x: 175, y: 350, label: "16. Condiments", w: 75, h: 45 },
+            17: { x: 175, y: 280, label: "17. Juice", w: 75, h: 45 },
+            18: { x: 275, y: 280, label: "18. Cheese/Bacon", w: 75, h: 45 },
+            19: { x: 375, y: 280, label: "19. Frozen", w: 75, h: 45 }
         };
 
         const raw_staples = [
@@ -448,7 +474,6 @@
             }).join('');
         }
 
-        // Read-only analysis: groups raw trip logs into dynamic zones based on pacing
         function computeDynamicClusters(logs, dwellThresholdSec = 90) {
             let clusterId = 1;
             let prevTime = null;
@@ -500,43 +525,80 @@
         }
 
         function renderMapView() {
-            const mapContainer = document.getElementById('map-grid-container');
+            const svg = document.getElementById('bird-map-svg');
             const clusteredLogs = computeDynamicClusters(tripLogs, 90);
-            const revLayout = Object.entries(STORE_LAYOUT).reduce((acc, [cat, num]) => { acc[num] = cat; return acc; }, {});
             
+            // Build sequence step order map per route number
             const visitOrderMap = {};
+            const orderedVisitedCoords = [];
+            
             clusteredLogs.forEach((l, idx) => {
-                if (l.routeNum && !visitOrderMap[l.routeNum]) {
-                    visitOrderMap[l.routeNum] = idx + 1;
+                if (l.routeNum) {
+                    if (!visitOrderMap[l.routeNum]) {
+                        visitOrderMap[l.routeNum] = idx + 1;
+                    }
+                    const c = STORE_ZONE_COORDS[l.routeNum];
+                    if (c && !orderedVisitedCoords.some(pt => pt.num === l.routeNum)) {
+                        orderedVisitedCoords.push({ num: l.routeNum, x: c.x + c.w/2, y: c.y + c.h/2, step: idx + 1 });
+                    }
                 }
             });
 
-            if (!clusteredLogs.length) {
-                mapContainer.innerHTML = '<div class="text-slate-400 italic text-center col-span-full py-8 text-sm">No trip data yet. Check off items while shopping!</div>';
-                return;
+            // Draw architectural store walls & entrance
+            let svgContent = `
+                <!-- Outer Store Perimeter Wall -->
+                <rect x="40" y="80" width="630" height="340" rx="14" fill="#ffffff" stroke="#94a3b8" stroke-width="4"></rect>
+                
+                <!-- Entrance / Checkout Front Portal -->
+                <rect x="270" y="415" width="200" height="20" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"></rect>
+                <text x="370" y="429" font-size="10" font-weight="bold" fill="#475569" text-anchor="middle">CHECKOUTS / ENTRANCE ⬇</text>
+            `;
+
+            // Draw polyline connecting visited points in chronological step order
+            if (orderedVisitedCoords.length > 1) {
+                const pointsStr = orderedVisitedCoords.map(p => `${p.x},${p.y}`).join(' ');
+                svgContent += `<polyline points="${pointsStr}" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="6,4" opacity="0.8"></polyline>`;
             }
 
-            mapContainer.innerHTML = Array.from({ length: 19 }, (_, i) => i + 1).map(num => {
-                const catName = revLayout[num] || `Zone ${num}`;
-                const stepNum = visitOrderMap[num];
+            // Draw all 19 store aisle/department blocks
+            Object.entries(STORE_ZONE_COORDS).forEach(([routeNumStr, zone]) => {
+                const rNum = parseInt(routeNumStr, 10);
+                const stepNum = visitOrderMap[rNum];
                 const isVisited = stepNum !== undefined;
                 
-                const cellClass = isVisited 
-                    ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm font-bold ring-2 ring-emerald-300' 
-                    : 'bg-white text-slate-400 border-slate-200';
-                    
-                const stepBadge = isVisited 
-                    ? `<span class="bg-slate-900/40 text-white rounded-full px-1.5 py-0.5 text-[9px] font-mono leading-none mb-1">Step #${stepNum}</span>` 
-                    : '';
+                const fillCol = isVisited ? '#d1fae5' : '#f8fafc';
+                const strokeCol = isVisited ? '#059669' : '#cbd5e1';
+                const textCol = isVisited ? '#065f46' : '#64748b';
 
-                return `
-                    <div class="p-2 rounded-xl border text-center flex flex-col justify-center items-center h-20 transition-all ${cellClass}">
-                        ${stepBadge}
-                        <span class="text-[10px] font-extrabold">Route #${num}</span>
-                        <span class="truncate w-full text-[9px] opacity-85">${catName.replace('&', '/')}</span>
-                    </div>
+                svgContent += `
+                    <g transform="translate(${zone.x}, ${zone.y})">
+                        <rect width="${zone.w}" height="${zone.h}" rx="8" fill="${fillCol}" stroke="${strokeCol}" stroke-width="${isVisited ? '2.5' : '1.5'}"></rect>
+                        <text x="${zone.w/2}" y="${zone.h/2 - 4}" font-size="9" font-weight="bold" fill="${textCol}" text-anchor="middle">${zone.label.split('.')[0]}</text>
+                        <text x="${zone.w/2}" y="${zone.h/2 + 9}" font-size="8" fill="${textCol}" text-anchor="middle" opacity="0.85">${zone.label.split('. ') || ''}</text>
+                    </g>
                 `;
-            }).join('');
+            });
+
+            // Draw chronological Step Badges (#1, #2, etc.) on top of visited aisle centroids
+            orderedVisitedCoords.forEach((pt) => {
+                svgContent += `
+                    <g transform="translate(${pt.x - 14}, ${pt.y - 14})">
+                        <circle cx="14" cy="14" r="13" fill="#0f172a" stroke="#10b981" stroke-width="2.5"></circle>
+                        <text x="14" y="17.5" font-size="9" font-weight="bold" fill="#10b981" text-anchor="middle">#${pt.step}</text>
+                    </g>
+                `;
+            });
+
+            if (!clusteredLogs.length) {
+                svgContent += `
+                    <g transform="translate(355, 230)">
+                        <rect x="-140" y="-22" width="280" height="44" rx="10" fill="#ffffff" stroke="#e2e8f0"></rect>
+                        <text x="0" y="4" font-size="12" font-weight="600" fill="#64748b" text-anchor="middle">No trip data yet — check off items on List tab!</text>
+                    </g>
+                `;
+            }
+
+            svg.innerHTML = svgContent;
         }
 
         function renderAll() {
