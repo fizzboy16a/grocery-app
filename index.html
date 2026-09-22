@@ -99,7 +99,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs</h2>
-                        <p class="text-xs text-slate-500">Offline-captured timestamped sequence gaps for route training.</p>
+                        <p class="text-xs text-slate-500">Offline-captured timestamped sequence gaps + dynamic dwell zones.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copyLogsToClipboard()" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">📋 Copy JSON</button>
@@ -112,7 +112,7 @@
                 </div>
 
                 <div class="space-y-2">
-                    <h3 class="text-sm font-semibold text-slate-700">Recent Transitions Breakdown</h3>
+                    <h3 class="text-sm font-semibold text-slate-700">Dynamic Dwell-Cluster Breakdown</h3>
                     <div id="logs-list-container" class="space-y-2 text-xs text-slate-600">
                         <!-- Populated via JS -->
                     </div>
@@ -414,25 +414,55 @@
             }).join('');
         }
 
+        // Read-only analysis: groups raw trip logs into dynamic zones based on pacing
+        function computeDynamicClusters(logs, dwellThresholdSec = 90) {
+            let clusterId = 1;
+            let prevTime = null;
+            return logs.map((log, index) => {
+                const logTime = new Date(log.checkedAtISO || Date.now()).getTime();
+                if (index > 0 && prevTime && (logTime - prevTime) / 1000 > dwellThresholdSec) {
+                    clusterId++;
+                }
+                prevTime = logTime;
+                const prevItem = index > 0 ? logs[index - 1].item : 'Start';
+                return {
+                    ...log,
+                    dynamicCluster: `zone_${clusterId}`,
+                    relPrevItem: prevItem
+                };
+            });
+        }
+
         function renderLogsView() {
             const jsonOutput = document.getElementById('logs-json-output');
             const listContainer = document.getElementById('logs-list-container');
-            jsonOutput.innerText = JSON.stringify(tripLogs, null, 2);
+            
+            const clusteredLogs = computeDynamicClusters(tripLogs, 90);
+            jsonOutput.innerText = JSON.stringify(clusteredLogs, null, 2);
 
-            if (!tripLogs.length) {
+            if (!clusteredLogs.length) {
                 listContainer.innerHTML = '<div class="text-slate-400 italic">No transition logs recorded yet. Check off items while shopping!</div>';
                 return;
             }
 
-            listContainer.innerHTML = [...tripLogs].reverse().map(l => `
-                <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl">
-                    <div>
-                        <span class="font-semibold text-slate-800">${l.item}</span> 
-                        <span class="text-slate-400">(${l.category}, Route #${l.routeNum || '?'})</span>
+            listContainer.innerHTML = [...clusteredLogs].reverse().map(l => {
+                const anchorBadge = `📍 [${l.dynamicCluster}] following "${l.relPrevItem}"`;
+
+                return `
+                    <div class="flex flex-col gap-1.5 bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-xl">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold text-slate-800">${l.item}</span> 
+                                <span class="text-slate-400 text-xs">(${l.category}, Route #${l.routeNum || '?'})</span>
+                            </div>
+                            <div class="font-mono text-slate-500 text-xs">+${l.secSincePrevCheck}s gap</div>
+                        </div>
+                        <div class="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit border border-emerald-100">
+                            ${anchorBadge}
+                        </div>
                     </div>
-                    <div class="font-mono text-slate-500">+${l.secSincePrevCheck}s gap</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function renderAll() {
