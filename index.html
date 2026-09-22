@@ -19,10 +19,10 @@
                 <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 text-xs font-semibold">
                     <button id="tab-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all">List</button>
                     <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI Logs</button>
-                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Live GPS Map</button>
+                    <button id="tab-map" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">🗺️ Location Map</button>
                 </div>
                 <button onclick="requestGPSPermission()" id="gps-perm-btn" class="bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-blue-200">
-                    📍 GPS Ready
+                    📍 Enable GPS
                 </button>
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
                     🔄 <span id="status-text">Sync</span>
@@ -82,7 +82,7 @@
             <!-- Live List Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-2">
                 <div class="w-full flex items-center justify-between mb-2">
-                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (GPS Pin-Drop on Check)</h2>
+                    <h2 class="text-lg font-bold text-slate-800 tracking-tight">Shopping List (Instant Location Tag on Check)</h2>
                     <span id="timestamp-label" class="text-xs font-medium text-slate-400">Last updated: Never</span>
                 </div>
                 <div id="list-container" class="space-y-1"></div>
@@ -94,8 +94,8 @@
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs (+ GPS)</h2>
-                        <p class="text-xs text-slate-500">Chronological check-off coordinates, GPS lat/lng, & accuracy.</p>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs</h2>
+                        <p class="text-xs text-slate-500">Chronological check-off coordinates, sequence, and actual location stamp.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copyLogsToClipboard()" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">📋 Copy JSON</button>
@@ -108,21 +108,34 @@
             </div>
         </div>
 
-        <!-- ==================== VIEW 3: LIVE GPS COORDINATES TRACE ==================== -->
+        <!-- ==================== VIEW 3: LIVE LOCATION TRACE ==================== -->
         <div id="view-map" class="hidden space-y-6">
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Real-Time GPS Check-Off Trace</h2>
-                        <p class="text-xs text-slate-500">Live device latitude/longitude recorded when crossing off list items.</p>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Check-Off Location Trace</h2>
+                        <p class="text-xs text-slate-500">Recorded coordinates or active indoor location stamps.</p>
                     </div>
                 </div>
                 <div id="gps-trace-container" class="space-y-2 bg-slate-50 border border-slate-200 rounded-2xl p-4 font-mono text-xs">
-                    No GPS coordinates captured yet. Check off items while location permission is enabled.
+                    No location captured yet. Check off items on the list.
                 </div>
             </div>
         </div>
 
+    </div>
+
+    <!-- Manual Location Modal Fallback -->
+    <div id="loc-modal" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-6 gap-4 items-center rounded-2xl shadow-xl max-w-sm w-full space-y-4 text-center">
+            <h3 class="text-lg font-semibold text-slate-800">Pin Location Tag</h3>
+            <p class="text-xs text-slate-500">GPS timed out/blocked indoors. Pick zone or enter label for: <span id="loc-item-name" class="font-bold"></span></p>
+            <input type="text" id="manual-loc-label" placeholder="e.g., Aisle 4 Mid / Near Bakery Corner" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none">
+            <div class="flex gap-3 justify-center">
+                <button onclick="confirmManualLocation()" class="bg-emerald-600 text-white font-medium rounded-xl hover:bg-emerald-700 px-4 py-2 text-sm">Save Stamp</button>
+                <button onclick="closeLocModal()" class="bg-slate-100 text-slate-600 font-medium rounded-xl hover:bg-slate-200 px-4 py-2 text-sm">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <!-- Reset Modal -->
@@ -214,6 +227,9 @@
         let checkSequenceCounter = tripLogs.length;
         let lastUpdatedTime = "Never";
         let searchQuery = "";
+        let activeModalIdx = null;
+
+        let lastKnownGPS = null;
 
         const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
         const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
@@ -225,13 +241,14 @@
             }
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Active (${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)})`;
+                    lastKnownGPS = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracyMeters: Math.round(pos.coords.accuracy) };
+                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Active`;
                     document.getElementById('gps-perm-btn').className = "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200";
                 },
                 (err) => {
-                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Denied/Err`;
+                    document.getElementById('gps-perm-btn').innerText = `📍 GPS Offline/Indoor`;
                 },
-                { enableHighAccuracy: true }
+                { enableHighAccuracy: true, timeout: 5000 }
             );
         }
 
@@ -268,7 +285,7 @@
                 existing.quantity += delta;
                 if (existing.quantity <= 0) shoppingList = shoppingList.filter(i => i !== existing);
             } else if (delta > 0) {
-                shoppingList.push({ name: stapleData.name, category: stapleData.category, img: stapleData.img || "", quantity: delta, checked: false, gpsPin: null });
+                shoppingList.push({ name: stapleData.name, category: stapleData.category, img: stapleData.img || "", quantity: delta, checked: false, locationTag: null });
             }
             saveState();
         }
@@ -290,38 +307,73 @@
                 checkSequenceCounter++;
                 const deltaSeconds = lastCheckTimestamp > 0 ? Math.round((now - lastCheckTimestamp) / 1000) : 0;
                 
+                // Try quick GPS or fall back immediately to category/stamp tag without hanging UI
+                let initialTag = lastKnownGPS 
+                    ? `GPS: ${lastKnownGPS.lat.toFixed(4)}, ${lastKnownGPS.lng.toFixed(4)}` 
+                    : `Checked at ${item.category}`;
+
                 const logEntry = {
                     item: item.name,
                     category: item.category,
-                    routeNum: STORE_LAYOUT[item.category] || 1,
                     sequenceStep: checkSequenceCounter,
                     checkedAtISO: new Date(now).toISOString(),
                     secSincePrevCheck: deltaSeconds,
-                    gps: null
+                    locationTag: initialTag,
+                    gps: lastKnownGPS
                 };
                 tripLogs.push(logEntry);
+                item.locationTag = initialTag;
+                item.logRef = logEntry;
                 lastCheckTimestamp = now;
 
-                // Grab live device GPS location immediately
-                if (navigator.geolocation) {
+                // Attempt async background GPS update if supported
+                if (navigator.geolocation && !lastKnownGPS) {
                     navigator.geolocation.getCurrentPosition(
                         (pos) => {
-                            logEntry.gps = {
-                                lat: pos.coords.latitude,
-                                lng: pos.coords.longitude,
-                                accuracyMeters: Math.round(pos.coords.accuracy)
-                            };
-                            item.gpsPin = logEntry.gps;
+                            const gpsData = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracyMeters: Math.round(pos.coords.accuracy) };
+                            lastKnownGPS = gpsData;
+                            logEntry.gps = gpsData;
+                            logEntry.locationTag = `GPS: ${gpsData.lat.toFixed(4)}, ${gpsData.lng.toFixed(4)}`;
+                            item.locationTag = logEntry.locationTag;
                             saveState();
                         },
                         () => {},
-                        { enableHighAccuracy: true, timeout: 4000 }
+                        { enableHighAccuracy: true, timeout: 3000 }
                     );
                 }
             } else {
-                item.gpsPin = null;
+                item.locationTag = null;
                 tripLogs = tripLogs.filter(l => l.item !== item.name);
             }
+            saveState();
+        }
+
+        function openLocModal(idx, event) {
+            if (event) event.stopPropagation();
+            activeModalIdx = idx;
+            const item = shoppingList[idx];
+            document.getElementById('loc-item-name').innerText = item.name;
+            document.getElementById('manual-loc-label').value = item.locationTag || '';
+            document.getElementById('loc-modal').classList.remove('hidden');
+            document.getElementById('loc-modal').classList.add('flex');
+        }
+
+        function closeLocModal() {
+            document.getElementById('loc-modal').classList.add('hidden');
+            document.getElementById('loc-modal').classList.remove('flex');
+            activeModalIdx = null;
+        }
+
+        function confirmManualLocation() {
+            if (activeModalIdx === null) return;
+            const customTag = document.getElementById('manual-loc-label').value.trim() || 'Manual check stamp';
+            const item = shoppingList[activeModalIdx];
+            item.locationTag = customTag;
+            if (item.checked) {
+                const existingLog = tripLogs.find(l => l.item === item.name && l.sequenceStep === checkSequenceCounter);
+                if (existingLog) existingLog.locationTag = customTag;
+            }
+            closeLocModal();
             saveState();
         }
 
@@ -344,7 +396,7 @@
             const customName = input.value.trim();
             const existing = shoppingList.find(i => i.name.toLowerCase() === customName.toLowerCase());
             if (existing) existing.quantity += 1;
-            else shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false, gpsPin: null });
+            else shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false, locationTag: null });
             input.value = '';
             saveState();
         }
@@ -392,12 +444,13 @@
             container.innerHTML = sortedList.map((item) => {
                 const realIdx = shoppingList.indexOf(item);
                 const routeNum = STORE_LAYOUT[item.category] || '??';
-                const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-60' : 'bg-slate-50 border-slate-100';
+                const rowClasses = item.checked ? 'bg-slate-100 border-slate-200 opacity-75' : 'bg-slate-50 border-slate-100';
                 const labelClasses = item.checked ? 'text-slate-400 line-through' : 'text-slate-700';
                 const imgTag = item.img ? `<img src="images/${encodeURIComponent(item.img)}" class="w-6 h-6 object-contain" onerror="this.outerHTML='<span class=\\'text-lg\\'>🛒</span>'">` : `<span class="text-lg">🛒</span>`;
-                const pinBadge = item.checked && item.gpsPin 
-                    ? `📍 GPS ${item.gpsPin.lat.toFixed(4)}, ${item.gpsPin.lng.toFixed(4)} (±${item.gpsPin.accuracyMeters}m)`
-                    : (item.checked ? `📍 Checked (GPS pending...)` : `Route #${routeNum} • ${item.category}`);
+                
+                const badgeText = item.checked 
+                    ? `📍 ${item.locationTag || 'Checked (tap to edit zone)'}`
+                    : `Default Category: ${item.category}`;
 
                 return `
                     <div class="w-full items-center justify-between border px-4 py-3 rounded-xl shadow-sm mb-2 transition-all flex ${rowClasses}">
@@ -405,7 +458,7 @@
                             ${imgTag}
                             <div>
                                 <div class="text-base font-medium ${labelClasses}">${item.name}</div>
-                                <div class="text-[11px] ${item.checked ? 'text-emerald-700 font-semibold' : 'text-slate-400'}">${pinBadge}</div>
+                                <div onclick="openLocModal(${realIdx}, event); event.stopPropagation();" class="text-[11px] ${item.checked ? 'text-emerald-700 font-semibold underline decoration-dotted cursor-pointer' : 'text-slate-400'}">${badgeText} ✏️</div>
                             </div>
                         </div>
                         <div class="items-center gap-1 flex">
@@ -425,18 +478,17 @@
 
         function renderMapView() {
             const container = document.getElementById('gps-trace-container');
-            const gpsLogs = tripLogs.filter(l => l.gps);
-            if (!gpsLogs.length) {
-                container.innerHTML = 'No GPS coordinates captured yet. Check off items while location permission is enabled.';
+            if (!tripLogs.length) {
+                container.innerHTML = 'No check-off location logs captured yet.';
                 return;
             }
-            container.innerHTML = gpsLogs.map(l => `
+            container.innerHTML = tripLogs.map(l => `
                 <div class="p-2 border-b border-slate-200 flex justify-between items-center">
                     <div>
                         <span class="font-bold text-emerald-700">Step #${l.sequenceStep}:</span> ${l.item}
                     </div>
                     <div class="text-slate-600 text-[11px]">
-                        LAT: ${l.gps.lat.toFixed(5)}, LNG: ${l.gps.lng.toFixed(5)} <span class="text-slate-400">(±${l.gps.accuracyMeters}m)</span>
+                        Tag: <span class="font-semibold text-slate-800">${l.locationTag || 'N/0'}</span>
                     </div>
                 </div>
             `).join('');
