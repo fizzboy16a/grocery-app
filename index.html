@@ -49,14 +49,10 @@
             <!-- Section 2: Custom Item Card -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <h2 class="text-lg font-bold text-slate-800 tracking-tight">Add Custom Item</h2>
-                <div class="w-full flex flex-col sm:flex-row gap-2 relative">
-                    <div class="w-full sm:flex-grow relative">
-                        <input type="text" id="custom-name-input" placeholder="e.g., Avocados" 
-                            class="w-full bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
-                            oninput="handleCustomInput(this.value)">
-                        <!-- Live Search / Duplicate Prevention Suggestion Dropdown -->
-                        <div id="custom-suggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-20"></div>
-                    </div>
+                <div class="w-full flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="custom-name-input" placeholder="e.g., Avocados" 
+                        class="w-full sm:flex-grow bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                        oninput="handleCustomInput(this.value)">
                     <div class="flex gap-2">
                         <select id="custom-cat-input" class="flex-1 sm:w-auto bg-slate-50 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none">
                             <option value="Salad & Vegetables">1. Salad & Veg</option>
@@ -363,77 +359,10 @@
             renderStaplesGrid();
         }
 
-        // New function to handle real-time checking as she types in the custom item box
+        // Typing in the custom item box filters the quick staples grid cleanly without a dropdown
         function handleCustomInput(val) {
-            const query = val.toLowerCase().trim();
-            const dropdown = document.getElementById('custom-suggestions');
-            
-            // Also automatically filter the quick staples grid so she sees matches instantly
-            searchQuery = query;
+            searchQuery = val.toLowerCase().trim();
             renderStaplesGrid();
-
-            if (!query) {
-                dropdown.classList.add('hidden');
-                dropdown.innerHTML = '';
-                return;
-            }
-
-            // Look for matches in the staples list or items already in the shopping list
-            const matchedStaples = staples.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
-            const matchedActiveList = shoppingList.filter(i => i.name.toLowerCase().includes(query));
-
-            if (matchedStaples.length === 0 && matchedActiveList.length === 0) {
-                dropdown.classList.add('hidden');
-                dropdown.innerHTML = '';
-                return;
-            }
-
-            let html = '';
-            
-            if (matchedActiveList.length > 0) {
-                html += `<div class="px-3 py-1 bg-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Already on your list:</div>`;
-                matchedActiveList.forEach(item => {
-                    const safeName = item.name.replace(/'/g, "\\'");
-                    html += `
-                        <div class="px-3 py-2 hover:bg-amber-50 cursor-pointer flex justify-between items-center text-xs border-b border-slate-100" onclick="incrementExistingItem('${safeName}')">
-                            <span class="font-medium text-slate-800">🛒 ${item.name} <span class="text-slate-400 font-normal">(Qty: ${item.quantity})</span></span>
-                            <span class="text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">+ Tap to add 1</span>
-                        </div>
-                    `;
-                });
-            }
-
-            if (matchedStaples.length > 0) {
-                html += `<div class="px-3 py-1 bg-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Matching Staples:</div>`;
-                matchedStaples.forEach(staple => {
-                    const safeName = staple.name.replace(/'/g, "\\'");
-                    html += `
-                        <div class="px-3 py-2 hover:bg-slate-50 cursor-pointer flex justify-between items-center text-xs border-b border-slate-100 last:border-0" onclick="selectStapleSuggestion('${safeName}')">
-                            <span class="font-medium text-slate-750">${staple.name} <span class="text-slate-400">(${staple.category})</span></span>
-                            <span class="text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">Add Staple</span>
-                        </div>
-                    `;
-                });
-            }
-
-            dropdown.innerHTML = html;
-            dropdown.classList.remove('hidden');
-        }
-
-        function incrementExistingItem(name) {
-            const existing = shoppingList.find(i => i.name.toLowerCase() === name.toLowerCase());
-            if (existing) {
-                existing.quantity += 1;
-            }
-            document.getElementById('custom-name-input').value = '';
-            document.getElementById('custom-suggestions').classList.add('hidden');
-            saveState();
-        }
-
-        function selectStapleSuggestion(name) {
-            adjustStapleQtyByName(name, 1);
-            document.getElementById('custom-name-input').value = '';
-            document.getElementById('custom-suggestions').classList.add('hidden');
         }
 
         function addCustomItem() {
@@ -448,7 +377,8 @@
                 shoppingList.push({ name: customName, category: cat, img: "", quantity: 1, checked: false });
             }
             input.value = '';
-            document.getElementById('custom-suggestions').classList.add('hidden');
+            searchQuery = "";
+            renderStaplesGrid();
             saveState();
         }
 
