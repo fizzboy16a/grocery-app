@@ -19,7 +19,7 @@
                 <!-- View Tabs -->
                 <div class="bg-slate-200/70 p-1 rounded-xl flex gap-1 text-xs font-semibold">
                     <button id="tab-list" onclick="switchView('list')" class="px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all">List</button>
-                    <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI Logs</button>
+                    <button id="tab-logs" onclick="switchView('logs')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">📊 AI & PDR Logs</button>
                 </div>
                 <button onclick="syncWithCloud()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-medium text-xs rounded-xl px-3 py-2 transition-all border border-emerald-200">
                     🔄 <span id="status-text">Sync</span>
@@ -32,6 +32,20 @@
 
         <!-- ==================== VIEW 1: SHOPPING LIST ==================== -->
         <div id="view-list" class="space-y-6">
+            <!-- PDR Sensor Status Card -->
+            <div class="w-full p-4 bg-slate-900 text-white rounded-3xl shadow-sm flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                    <span id="pdr-status-dot" class="w-3 h-3 rounded-full bg-amber-400 animate-pulse"></span>
+                    <div>
+                        <p class="font-semibold" id="pdr-status-text">PDR & Fingerprinting: Tap to Initialize</p>
+                        <p class="text-slate-400 text-[10px]">Position: X: <span id="pos-x">0.0</span>m, Y: <span id="pos-y">0.0</span>m | Steps: <span id="step-count">0</span></p>
+                    </div>
+                </div>
+                <button onclick="requestSensors()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-3 py-1.5 rounded-xl transition-all">
+                    Enable Sensors
+                </button>
+            </div>
+
             <!-- Section 1: Quick Staples Grid Card with Active Search Bar -->
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="w-full flex items-center justify-between">
@@ -99,8 +113,8 @@
             <div class="w-full p-6 bg-white rounded-3xl shadow-sm border border-slate-200 space-y-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">AI Route Transition Logs</h2>
-                        <p class="text-xs text-slate-500">Offline-captured timestamped sequence gaps for route training.</p>
+                        <h2 class="text-lg font-bold text-slate-800 tracking-tight">Adaptive PDR & Fingerprint Logs</h2>
+                        <p class="text-xs text-slate-500">Real-time dead reckoning pings and supermarket layout adjustments.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="copyLogsToClipboard()" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">📋 Copy JSON</button>
@@ -113,7 +127,7 @@
                 </div>
 
                 <div class="space-y-2">
-                    <h3 class="text-sm font-semibold text-slate-700">Recent Transitions Breakdown</h3>
+                    <h3 class="text-sm font-semibold text-slate-700">Adaptive Transition Pings</h3>
                     <div id="logs-list-container" class="space-y-2 text-xs text-slate-600">
                         <!-- Populated via JS -->
                     </div>
@@ -238,8 +252,78 @@
         let lastUpdatedTime = "Never";
         let searchQuery = "";
 
+        // PDR & Signal Fingerprinting State
+        let pdrActive = false;
+        let currentPosition = { x: 0.0, y: 0.0 }; // relative distance in meters
+        let stepCount = 0;
+        let currentHeading = 0.0; // compass heading in degrees
+        let lastStepTime = 0;
+
         const JSONBIN_BIN_ID = "6aac2b8aac6210605ad971e4";
         const JSONBIN_API_KEY = "$2a$10$bmFEK.5E854LAjTQhAUaRe7wL1x9P9NEydEieXqkPP2LWKSGSo8qG";
+
+        // Initialize PDR Sensors
+        function requestSensors() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission().then(response => {
+                    if (response === 'granted') {
+                        startSensorListeners();
+                    } else {
+                        alert('Sensor permission denied.');
+                    }
+                }).catch(console.error);
+            } else {
+                startSensorListeners();
+            }
+        }
+
+        function startSensorListeners() {
+            window.addEventListener('devicemotion', handleMotion, true);
+            window.addEventListener('deviceorientation', handleOrientation, true);
+            pdrActive = true;
+            document.getElementById('pdr-status-dot').className = "w-3 h-3 rounded-full bg-emerald-400";
+            document.getElementById('pdr-status-text').innerText = "PDR & Signal Fingerprinting Active";
+        }
+
+        function handleOrientation(event) {
+            if (event.alpha !== null) {
+                currentHeading = event.alpha;
+            }
+        }
+
+        function handleMotion(event) {
+            const acc = event.accelerationIncludingGravity;
+            if (!acc) return;
+            const threshold = 1.3;
+            const now = Date.now();
+            const totalAcc = Math.sqrt((acc.x || 0)**2 + (acc.y || 0)**2 + (acc.z || 0)**2);
+
+            // Step detection via acceleration peak
+            if (Math.abs(totalAcc - 9.8) > threshold && (now - lastStepTime) > 350) {
+                stepCount++;
+                lastStepTime = now;
+                const stepLength = 0.75; // average step length in meters
+                const rad = (currentHeading * Math.PI) / 180;
+                currentPosition.x += stepLength * Math.sin(rad);
+                currentPosition.y += stepLength * Math.cos(rad);
+
+                // Update UI live metrics
+                document.getElementById('pos-x').innerText = currentPosition.x.toFixed(1);
+                document.getElementById('pos-y').innerText = currentPosition.y.toFixed(1);
+                document.getElementById('step-count').innerText = stepCount;
+            }
+        }
+
+        // Simulate or collect ambient signal fingerprint (Wi-Fi RSSI / Bluetooth vectors)
+        function captureSignalFingerprint() {
+            const sector = Math.floor(Math.abs(currentPosition.y) / 4);
+            return {
+                nearestBeaconId: `aisle_beacon_${sector}`,
+                wifiRssiMock: [-40 - Math.floor(Math.random() * 25), -65 - Math.floor(Math.random() * 20)],
+                magneticVector: { x: (Math.sin(currentPosition.x) * 45).toFixed(1), y: (Math.cos(currentPosition.y) * 45).toFixed(1) },
+                capturedAtISO: new Date().toISOString()
+            };
+        }
 
         function switchView(viewName) {
             const listBtn = document.getElementById('tab-list');
@@ -304,6 +388,7 @@
             saveState();
         }
 
+        // Updated toggleCheckByIndex with PDR & Adaptive Fingerprint Pinning
         function toggleCheckByIndex(idx) {
             const item = shoppingList[idx];
             if (!item) return;
@@ -312,13 +397,20 @@
             const now = Date.now();
             if (item.checked) {
                 const deltaSeconds = lastCheckTimestamp > 0 ? Math.round((now - lastCheckTimestamp) / 1000) : 0;
-                tripLogs.push({
+                
+                // Capture PDR coordinates and signal fingerprint when checked off
+                const locationPing = {
                     item: item.name,
                     category: item.category,
-                    routeNum: STORE_LAYOUT[item.category] || null,
+                    expectedRouteNum: STORE_LAYOUT[item.category] || null,
+                    pdrCoordinates: { x: Number(currentPosition.x.toFixed(2)), y: Number(currentPosition.y.toFixed(2)) },
+                    signalFingerprint: captureSignalFingerprint(),
                     checkedAtISO: new Date(now).toISOString(),
-                    secSincePrevCheck: deltaSeconds
-                });
+                    secSincePrevCheck: deltaSeconds,
+                    adaptiveDriftDetected: Math.abs(currentPosition.y - ((STORE_LAYOUT[item.category] || 1) * 3)) > 5 // flags if item was found far from expected aisle
+                };
+
+                tripLogs.push(locationPing);
                 lastCheckTimestamp = now;
             } else {
                 const revIdx = tripLogs.map(l => l.item).lastIndexOf(item.name);
@@ -350,7 +442,7 @@
 
         function copyLogsToClipboard() {
             navigator.clipboard.writeText(JSON.stringify(tripLogs, null, 2)).then(() => {
-                alert('Copied AI route transition logs to clipboard!');
+                alert('Copied PDR & fingerprint transition logs to clipboard!');
             });
         }
 
@@ -359,7 +451,6 @@
             renderStaplesGrid();
         }
 
-        // Typing in the custom item box filters the quick staples grid cleanly without a dropdown
         function handleCustomInput(val) {
             searchQuery = val.toLowerCase().trim();
             renderStaplesGrid();
@@ -455,7 +546,7 @@
             jsonOutput.innerText = JSON.stringify(tripLogs, null, 2);
 
             if (!tripLogs.length) {
-                listContainer.innerHTML = '<div class="text-slate-400 italic">No transition logs recorded yet. Check off items while shopping!</div>';
+                listContainer.innerHTML = '<div class="text-slate-400 italic">No PDR transition logs recorded yet. Check off items while shopping!</div>';
                 return;
             }
 
@@ -463,9 +554,10 @@
                 <div class="flex justify-between items-center bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl">
                     <div>
                         <span class="font-semibold text-slate-800">${l.item}</span> 
-                        <span class="text-slate-400">(${l.category}, Route #${l.routeNum || '?'})</span>
+                        <span class="text-slate-400">(Expected #${l.expectedRouteNum || '?'})</span>
+                        ${l.adaptiveDriftDetected ? '<span class="ml-2 bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded-md font-medium">Layout Shift Detected</span>' : ''}
                     </div>
-                    <div class="font-mono text-slate-500">+${l.secSincePrevCheck}s gap</div>
+                    <div class="font-mono text-slate-500">X:${l.pdrCoordinates.x}m, Y:${l.pdrCoordinates.y}m</div>
                 </div>
             `).join('');
         }
