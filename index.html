@@ -158,9 +158,8 @@
         };
 
         const raw_staples = [
-            // Existing Staples
+            // 1. Salad & Vegetables
             { name: "Spinach", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
-            { name: "Honey", category: "Pantry", img: "icons8-honey-100.png" },
             { name: "Lettuce", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
             { name: "Tomatoes", category: "Salad & Vegetables", img: "icons8-tomatoes-48.png" },
             { name: "Lemon", category: "Salad & Vegetables", img: "icons8-lemon-64.png" },
@@ -168,119 +167,154 @@
             { name: "White onions", category: "Salad & Vegetables", img: "icons8-onion-96.png" },
             { name: "Celery", category: "Salad & Vegetables", img: "icons8-celery-96.png" },
             { name: "Potatoes", category: "Salad & Vegetables", img: "icons8-potatoes-94.png" },
+            { name: "Sweet potato", category: "Salad & Vegetables", img: "" },
             { name: "Carrots", category: "Salad & Vegetables", img: "icons8-carrots-64.png" },
             { name: "Green beans", category: "Salad & Vegetables", img: "icons8-beans-60.png" },
-            { name: "Pears", category: "Salad & Vegetables", img: "icons8-pears-64.png" },
             { name: "Asparagus", category: "Salad & Vegetables", img: "icons8-asparagus-100.png" },
             { name: "Mint", category: "Salad & Vegetables", img: "icons8-mint-100.png" },
+            { name: "Fresh corriander", category: "Salad & Vegetables", img: "" },
             { name: "Courgette", category: "Salad & Vegetables", img: "icons8-courgette-64.png" },
             { name: "Kale", category: "Salad & Vegetables", img: "icons8-kale-96.png" },
-            { name: "Small plain flour", category: "Salad & Vegetables", img: "icons8-flour-in-paper-packaging-96.png" },
-            { name: "Small detol for Rebecca", category: "Salad & Vegetables", img: "icons8-spray-bottle-64.png" },
-            { name: "Seabrook crisps", category: "Salad & Vegetables", img: "icons8-crisps-60.png" },
-            { name: "Weetabix", category: "Salad & Vegetables", img: "icons8-cereal-oats-muesli-96.png" },
-            { name: "Lemon juice", category: "Salad & Vegetables", img: "icons8-bottle-of-water-100.png" },
-            { name: "Chopped tomatoes", category: "Salad & Vegetables", img: "icons8-canned-food-96.png" },
-            { name: "Baked beans", category: "Salad & Vegetables", img: "icons8-can-soup-100.png" },
-            { name: "Greek yogurt 0%", category: "Salad & Vegetables", img: "icons8-yogurt-64 (1).png" },
+            { name: "Cauliflower", category: "Salad & Vegetables", img: "" },
+            { name: "Normal broccoli", category: "Salad & Vegetables", img: "" },
+            { name: "Avocado", category: "Salad & Vegetables", img: "" },
             { name: "Peas", category: "Salad & Vegetables", img: "icons8-peas-96.png" },
-            { name: "Muesli", category: "Salad & Vegetables", img: "icons8-cereal-oats-muesli-96.png" },
+
+            // 2. Bananas
             { name: "Bananas", category: "Bananas", img: "icons8-banana-100.png" },
+
+            // 3. Health Foods
             { name: "Pumpkin Seeds", category: "Health Foods", img: "icons8-pumkin-64.png" },
+            { name: "Chia seeds", category: "Health Foods", img: "icons8-chia-seeds-100.png" },
+
+            // 4. Berries
             { name: "Blueberries", category: "Berries", img: "icons8-blueberries-48.png" },
             { name: "Raspberries", category: "Berries", img: "icons8-raspberry-48.png" },
+            { name: "Figs", category: "Berries", img: "" },
+
+            // 5. Fresh Produce
             { name: "Mushrooms", category: "Fresh Produce", img: "icons8-mushroom-48.png" },
             { name: "Cucumber", category: "Fresh Produce", img: "icons8-cucumber-64.png" },
             { name: "Spring Onion", category: "Fresh Produce", img: "icons8-spring-onion-64.png" },
             { name: "Garlic", category: "Fresh Produce", img: "icons8-garlic-48.png" },
             { name: "Peppers", category: "Fresh Produce", img: "icons8-tomatoes-48.png" },
             { name: "Tendersteam Broccoli", category: "Fresh Produce", img: "icons8-broccoli-100.png" },
-            { name: "Single cream", category: "Fresh Produce", img: "icons8-yogurt-100 (1).png" },
+            { name: "Pears", category: "Fresh Produce", img: "icons8-pears-64.png" },
+            { name: "Tangerine", category: "Fresh Produce", img: "" },
+            { name: "Easy peel tangerine", category: "Fresh Produce", img: "" },
+
+            // 6. Fish & Seafood
             { name: "Cod", category: "Fish & Seafood", img: "icons8-cod-48.png" },
             { name: "Salmon", category: "Fish & Seafood", img: "icons8-tuna-67.png" },
             { name: "Tuna Steak (frozen)", category: "Fish & Seafood", img: "icons8-tuna-67.png" },
             { name: "Tinned Tuna", category: "Fish & Seafood", img: "icons8-tin-can-64.png" },
+
+            // 7. Household
             { name: "Comfort Pure", category: "Household", img: "icons8-bleach-24.png" },
             { name: "Bleach", category: "Household", img: "icons8-bleach-24.png" },
             { name: "Bin Liners", category: "Household", img: "icons8-recycle-bin-80.png" },
-            { name: "Rice Krispies", category: "Household", img: "icons8-cereal-100.png" },
             { name: "Surface cleaner", category: "Household", img: "icons8-spray-bottle-64.png" },
-            { name: "Squash", category: "Drinks", img: "icons8-juice-64.png" },
-            { name: "Bread", category: "Bakery", img: "icons8-bread-64.png" },
-            { name: "Burger Buns", category: "Bakery", img: "icons8-hamburger-24.png" },
-            { name: "Soreen", category: "Bakery", img: "icons8-barley-100.png" },
-            { name: "KitKats", category: "Snacks", img: "icons8-chocolate-100.png" },
-            { name: "Coffee", category: "Coffee & Sugar", img: "icons8-coffee-48.png" },
-            { name: "Sugar", category: "Coffee & Sugar", img: "icons8-sugar-cube-80.png" },
-            { name: "Sweeteners", category: "Coffee & Sugar", img: "icons8-sweetener-50.png" },
-            { name: "Chicken Breast", category: "Meat", img: "icons8-chicken-breast-64.png" },
-            { name: "Mince Meat", category: "Meat", img: "icons8-ground-beef-100.png" },
-            { name: "Rump Steak", category: "Meat", img: "icons8-rump-steak-64.png" },
-            { name: "Sirloin Steak", category: "Meat", img: "icons8-sirloin-80.png" },
-            { name: "Lamb (diced)", category: "Meat", img: "icons8-lamb-100.png" },
-            { name: "Turkey", category: "Meat", img: "icons8-turkey-96.png" },
-            { name: "Tofu", category: "Meat", img: "icons8-tofu-64.png" },
-            { name: "Dolmio Sauce", category: "Pantry", img: "icons8-ketchup-100.png" },
-            { name: "Pasta", category: "Pantry", img: "icons8-spaghetti-48.png" },
-            { name: "Coconut Milk low salt", category: "Pantry", img: "icons8-coconut-milk-100.png" },
-            { name: "Chia seeds", category: "Pantry", img: "icons8-chia-seeds-100.png" },
-            { name: "Eggs", category: "Pantry", img: "icons8-eggs-94.png" },
-            { name: "Detol wipes", category: "Pantry", img: "icons8-wipes-100.png" },
-            { name: "Mango chutney", category: "Pantry", img: "icons8-jar-96.png" },
-            { name: "Basil (herbs)", category: "Pantry", img: "icons8-basil-96.png" },
-            { name: "Hand soap", category: "Pantry", img: "icons8-soap-96.png" },
-            { name: "Spanish Grains", category: "Grains", img: "icons8-spain-48.png" },
-            { name: "Milk", category: "Dairy", img: "icons8-milk-48.png" },
-            { name: "Protein Yogurt", category: "Dairy", img: "icons8-milk-48 (1).png" },
-            { name: "Kefir", category: "Dairy", img: "icons8-milk-48.png" },
-            { name: "Double Cream", category: "Dairy", img: "icons8-yogurt-100.png" },
-            { name: "Greek yogurt 5%", category: "Dairy", img: "icons8-yogurt-64 (1).png" },
-            { name: "Sour cream", category: "Dairy", img: "icons8-yogurt-64 (1).png" },
-            { name: "Crème fraiche", category: "Dairy", img: "icons8-yogurt-64 (1).png" },
-            { name: "Olive Oil", category: "Condiments", img: "icons8-olive-oil-24.png" },
-            { name: "Ketchup", category: "Condiments", img: "icons8-ketchup-100.png" },
-            { name: "BBQ Sauce", category: "Condiments", img: "icons8-bbq-sauce-24.png" },
-            { name: "Ginger paste", category: "Condiments", img: "icons8-ginger-94.png" },
-            { name: "Orange Juice", category: "Juice", img: "icons8-orange-juice-100.png" },
-            { name: "Cheese slices", category: "Cheese & Bacon", img: "icons8-cheese-94.png" },
-            { name: "Bacon", category: "Cheese & Bacon", img: "icons8-bacon-100.png" },
-            { name: "Mini Magnums", category: "Frozen", img: "icons8-melting-ice-cream-48.png" },
-
-            // Newly Added Missing Items from test.txt
-            { name: "Avocado", category: "Salad & Vegetables", img: "" },
-            { name: "Cauliflower", category: "Salad & Vegetables", img: "" },
-            { name: "Fresh corriander", category: "Salad & Vegetables", img: "" },
-            { name: "Normal broccoli", category: "Salad & Vegetables", img: "" },
-            { name: "Sweet potato", category: "Salad & Vegetables", img: "" },
-            { name: "Tangerine", category: "Salad & Vegetables", img: "" },
-            { name: "Easy peel tangerine", category: "Berries", img: "" },
-            { name: "Figs", category: "Berries", img: "" },
+            { name: "Small detol for Rebecca", category: "Household", img: "icons8-spray-bottle-64.png" },
+            { name: "Detol wipes", category: "Household", img: "icons8-wipes-100.png" },
+            { name: "Hand soap", category: "Household", img: "icons8-soap-96.png" },
+            { name: "Tin foil", category: "Household", img: "" },
             { name: "Bepanthen 100g", category: "Household", img: "" },
             { name: "Folic acid", category: "Household", img: "" },
             { name: "Nappies size 4", category: "Household", img: "" },
             { name: "Premium pampers size 4", category: "Household", img: "" },
             { name: "Rebecca deodorant dove spray", category: "Household", img: "" },
-            { name: "Tin foil", category: "Household", img: "" },
+
+            // 8. Drinks
+            { name: "Squash", category: "Drinks", img: "icons8-juice-64.png" },
             { name: "Red wine Shiraz", category: "Drinks", img: "" },
-            { name: "Whole milk", category: "Drinks", img: "" },
-            { name: "Parmaham", category: "Meat", img: "" },
-            { name: "Pork mince", category: "Meat", img: "" },
-            { name: "Sliced ham cooked", category: "Meat", img: "" },
-            { name: "Turkey or chicken mince", category: "Meat", img: "" },
+
+            // 9. Bakery
+            { name: "Bread", category: "Bakery", img: "icons8-bread-64.png" },
+            { name: "Burger Buns", category: "Bakery", img: "icons8-hamburger-24.png" },
+            { name: "Soreen", category: "Bakery", img: "icons8-barley-100.png" },
+
+            // 10. Snacks
+            { name: "KitKats", category: "Snacks", img: "icons8-chocolate-100.png" },
+            { name: "Seabrook crisps", category: "Snacks", img: "icons8-crisps-60.png" },
+
+            // 11. Coffee & Sugar
+            { name: "Coffee", category: "Coffee & Sugar", img: "icons8-coffee-48.png" },
+            { name: "Sugar", category: "Coffee & Sugar", img: "icons8-sugar-cube-80.png" },
+            { name: "Sweeteners", category: "Coffee & Sugar", img: "icons8-sweetener-50.png" },
+
+            // 12. Meat
+            { name: "Chicken Breast", category: "Meat", img: "icons8-chicken-breast-64.png" },
             { name: "Whole chicken", category: "Meat", img: "" },
-            { name: "Beef stock", category: "Pantry", img: "" },
-            { name: "Ceasar salad dressing", category: "Pantry", img: "" },
-            { name: "Chicken stock", category: "Pantry", img: "" },
-            { name: "Oregano", category: "Pantry", img: "" },
+            { name: "Mince Meat", category: "Meat", img: "icons8-ground-beef-100.png" },
+            { name: "Pork mince", category: "Meat", img: "" },
+            { name: "Turkey or chicken mince", category: "Meat", img: "" },
+            { name: "Rump Steak", category: "Meat", img: "icons8-rump-steak-64.png" },
+            { name: "Sirloin Steak", category: "Meat", img: "icons8-sirloin-80.png" },
+            { name: "Lamb (diced)", category: "Meat", img: "icons8-lamb-100.png" },
+            { name: "Turkey", category: "Meat", img: "icons8-turkey-96.png" },
+            { name: "Parmaham", category: "Meat", img: "" },
+            { name: "Sliced ham cooked", category: "Meat", img: "" },
+            { name: "Tofu", category: "Meat", img: "icons8-tofu-64.png" },
+
+            // 13. Pantry
+            { name: "Honey", category: "Pantry", img: "icons8-honey-100.png" },
+            { name: "Dolmio Sauce", category: "Pantry", img: "icons8-ketchup-100.png" },
+            { name: "Pasta", category: "Pantry", img: "icons8-spaghetti-48.png" },
             { name: "Orzo", category: "Pantry", img: "" },
             { name: "Rice", category: "Pantry", img: "" },
+            { name: "Coconut Milk low salt", category: "Pantry", img: "icons8-coconut-milk-100.png" },
+            { name: "Eggs", category: "Pantry", img: "icons8-eggs-94.png" },
+            { name: "Basil (herbs)", category: "Pantry", img: "icons8-basil-96.png" },
+            { name: "Oregano", category: "Pantry", img: "" },
             { name: "Turmeric", category: "Pantry", img: "" },
+            { name: "Beef stock", category: "Pantry", img: "" },
+            { name: "Chicken stock", category: "Pantry", img: "" },
+            { name: "Small plain flour", category: "Pantry", img: "icons8-flour-in-paper-packaging-96.png" },
+            { name: "Chopped tomatoes", category: "Pantry", img: "icons8-canned-food-96.png" },
+            { name: "Baked beans", category: "Pantry", img: "icons8-can-soup-100.png" },
+            { name: "Weetabix", category: "Pantry", img: "icons8-cereal-oats-muesli-96.png" },
+            { name: "Muesli", category: "Pantry", img: "icons8-cereal-oats-muesli-96.png" },
+            { name: "Rice Krispies", category: "Pantry", img: "icons8-cereal-100.png" },
+
+            // 14. Grains
+            { name: "Spanish Grains", category: "Grains", img: "icons8-spain-48.png" },
             { name: "Lentils dried green or red", category: "Grains", img: "" },
             { name: "Quinoa", category: "Grains", img: "" },
+
+            // 15. Dairy
+            { name: "Milk", category: "Dairy", img: "icons8-milk-48.png" },
             { name: "Full fat milk", category: "Dairy", img: "" },
+            { name: "Whole milk", category: "Dairy", img: "" },
+            { name: "Protein Yogurt", category: "Dairy", img: "icons8-milk-48 (1).png" },
+            { name: "Kefir", category: "Dairy", img: "icons8-milk-48.png" },
+            { name: "Single cream", category: "Dairy", img: "icons8-yogurt-100 (1).png" },
+            { name: "Double Cream", category: "Dairy", img: "icons8-yogurt-100.png" },
+            { name: "Greek yogurt 0%", category: "Dairy", img: "icons8-yogurt-64 (1).png" },
+            { name: "Greek yogurt 5%", category: "Dairy", img: "icons8-yogurt-64 (1).png" },
+            { name: "Sour cream", category: "Dairy", img: "icons8-yogurt-64 (1).png" },
+            { name: "Crème fraiche", category: "Dairy", img: "icons8-yogurt-64 (1).png" },
             { name: "Unsalted butter", category: "Dairy", img: "" },
+
+            // 16. Condiments
+            { name: "Olive Oil", category: "Condiments", img: "icons8-olive-oil-24.png" },
+            { name: "Ketchup", category: "Condiments", img: "icons8-ketchup-100.png" },
+            { name: "BBQ Sauce", category: "Condiments", img: "icons8-bbq-sauce-24.png" },
+            { name: "Ginger paste", category: "Condiments", img: "icons8-ginger-94.png" },
+            { name: "Mango chutney", category: "Condiments", img: "icons8-jar-96.png" },
+            { name: "Lemon juice", category: "Condiments", img: "icons8-bottle-of-water-100.png" },
             { name: "100% nut peanut butter", category: "Condiments", img: "" },
+            { name: "Ceasar salad dressing", category: "Condiments", img: "" },
             { name: "Salad crème", category: "Condiments", img: "" },
+
+            // 17. Juice
+            { name: "Orange Juice", category: "Juice", img: "icons8-orange-juice-100.png" },
+
+            // 18. Cheese & Bacon
+            { name: "Cheese slices", category: "Cheese & Bacon", img: "icons8-cheese-94.png" },
+            { name: "Bacon", category: "Cheese & Bacon", img: "icons8-bacon-100.png" },
+
+            // 19. Frozen
+            { name: "Mini Magnums", category: "Frozen", img: "icons8-melting-ice-cream-48.png" },
             { name: "Prawns", category: "Frozen", img: "" }
         ];
 
@@ -645,4 +679,3 @@
     </script>
 </body>
 </html>
-```[cite: 1, 2]
