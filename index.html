@@ -158,6 +158,7 @@
         };
 
         const raw_staples = [
+            // Existing Staples
             { name: "Spinach", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
             { name: "Honey", category: "Pantry", img: "icons8-honey-100.png" },
             { name: "Lettuce", category: "Salad & Vegetables", img: "icons8-spinach-48.png" },
@@ -243,8 +244,46 @@
             { name: "Orange Juice", category: "Juice", img: "icons8-orange-juice-100.png" },
             { name: "Cheese slices", category: "Cheese & Bacon", img: "icons8-cheese-94.png" },
             { name: "Bacon", category: "Cheese & Bacon", img: "icons8-bacon-100.png" },
-            { name: "Mini Magnums", category: "Frozen", img: "icons8-melting-ice-cream-48.png" }
+            { name: "Mini Magnums", category: "Frozen", img: "icons8-melting-ice-cream-48.png" },
+
+            // Newly Added Missing Items from test.txt
+            { name: "Avocado", category: "Salad & Vegetables", img: "" },
+            { name: "Cauliflower", category: "Salad & Vegetables", img: "" },
+            { name: "Fresh corriander", category: "Salad & Vegetables", img: "" },
+            { name: "Normal broccoli", category: "Salad & Vegetables", img: "" },
+            { name: "Sweet potato", category: "Salad & Vegetables", img: "" },
+            { name: "Tangerine", category: "Salad & Vegetables", img: "" },
+            { name: "Easy peel tangerine", category: "Berries", img: "" },
+            { name: "Figs", category: "Berries", img: "" },
+            { name: "Bepanthen 100g", category: "Household", img: "" },
+            { name: "Folic acid", category: "Household", img: "" },
+            { name: "Nappies size 4", category: "Household", img: "" },
+            { name: "Premium pampers size 4", category: "Household", img: "" },
+            { name: "Rebecca deodorant dove spray", category: "Household", img: "" },
+            { name: "Tin foil", category: "Household", img: "" },
+            { name: "Red wine Shiraz", category: "Drinks", img: "" },
+            { name: "Whole milk", category: "Drinks", img: "" },
+            { name: "Parmaham", category: "Meat", img: "" },
+            { name: "Pork mince", category: "Meat", img: "" },
+            { name: "Sliced ham cooked", category: "Meat", img: "" },
+            { name: "Turkey or chicken mince", category: "Meat", img: "" },
+            { name: "Whole chicken", category: "Meat", img: "" },
+            { name: "Beef stock", category: "Pantry", img: "" },
+            { name: "Ceasar salad dressing", category: "Pantry", img: "" },
+            { name: "Chicken stock", category: "Pantry", img: "" },
+            { name: "Oregano", category: "Pantry", img: "" },
+            { name: "Orzo", category: "Pantry", img: "" },
+            { name: "Rice", category: "Pantry", img: "" },
+            { name: "Turmeric", category: "Pantry", img: "" },
+            { name: "Lentils dried green or red", category: "Grains", img: "" },
+            { name: "Quinoa", category: "Grains", img: "" },
+            { name: "Full fat milk", category: "Dairy", img: "" },
+            { name: "Unsalted butter", category: "Dairy", img: "" },
+            { name: "100% nut peanut butter", category: "Condiments", img: "" },
+            { name: "Salad crème", category: "Condiments", img: "" },
+            { name: "Prawns", category: "Frozen", img: "" }
         ];
+
         const staples = [...raw_staples].sort((a, b) => a.name.localeCompare(b.name));
         let shoppingList = JSON.parse(localStorage.getItem('grocery_list') || '[]');
         let tripLogs = JSON.parse(localStorage.getItem('grocery_trip_logs') || '[]');
@@ -606,3 +645,4 @@
     </script>
 </body>
 </html>
+```[cite: 1, 2]
